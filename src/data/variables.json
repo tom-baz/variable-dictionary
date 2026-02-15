@@ -1,0 +1,422 @@
+{
+  "Strategy 2": [
+    {
+      "name": "wages_s2",
+      "definition": "Annual wage income",
+      "type": "wage",
+      "source": "tbl_hahnsotpratt87_21",
+      "notebook": "compute_income_variables.ipynb",
+      "logic": "Renamed from HahnasaSahar. Missing values replaced with 0.",
+      "inputs": ["HahnasaSahar"],
+      "code": "# Rename CBS variable\ntbl_hahnsotpratt87_21.rename(\n    columns={'HahnasaSahar': 'wages_s2'},\n    inplace=True\n)\n\n# Convert missing values to 0\ntbl_hahnsotpratt87_21['wages_s2'] = (\n    tbl_hahnsotpratt87_21['wages_s2'].fillna(0)\n)"
+    },
+    {
+      "name": "business_income_s2",
+      "definition": "Annual business income (self-employment)",
+      "type": "wage",
+      "source": "tbl_hahnsotpratt87_21",
+      "notebook": "compute_income_variables.ipynb",
+      "logic": "Renamed from Hahnasa_iskit. Missing values replaced with 0.",
+      "inputs": ["Hahnasa_iskit"],
+      "code": "# Rename CBS variable\ntbl_hahnsotpratt87_21.rename(\n    columns={'Hahnasa_iskit': 'business_income_s2'},\n    inplace=True\n)\n\n# Convert missing values to 0\ntbl_hahnsotpratt87_21['business_income_s2'] = (\n    tbl_hahnsotpratt87_21['business_income_s2'].fillna(0)\n)"
+    },
+    {
+      "name": "capital_gains_s2",
+      "definition": "Annual capital income",
+      "type": "capital",
+      "source": "tbl_hahnsotpratt87_21",
+      "notebook": "compute_income_variables.ipynb",
+      "logic": "Renamed from Hahnasa_honit. Missing values replaced with 0.",
+      "inputs": ["Hahnasa_honit"],
+      "code": "# Rename CBS variable\ntbl_hahnsotpratt87_21.rename(\n    columns={'Hahnasa_honit': 'capital_gains_s2'},\n    inplace=True\n)\n\n# Convert missing values to 0\ntbl_hahnsotpratt87_21['capital_gains_s2'] = (\n    tbl_hahnsotpratt87_21['capital_gains_s2'].fillna(0)\n)"
+    },
+    {
+      "name": "dividends_s2",
+      "definition": "Annual dividends income",
+      "type": "capital",
+      "source": "tbl_hahnsotpratt87_21",
+      "notebook": "compute_income_variables.ipynb",
+      "logic": "Renamed from Hahnasa_honit_aheret. Missing values replaced with 0.",
+      "inputs": ["Hahnasa_honit_aheret"],
+      "code": "tbl_hahnsotpratt87_21.rename(\n    columns={'Hahnasa_honit_aheret': 'dividends_s2'},\n    inplace=True\n)\ntbl_hahnsotpratt87_21['dividends_s2'] = (\n    tbl_hahnsotpratt87_21['dividends_s2'].fillna(0)\n)"
+    },
+    {
+      "name": "other_wage_s2",
+      "definition": "Other annual wage income",
+      "type": "wage",
+      "source": "tbl_hahnsotpratt87_21",
+      "notebook": "compute_income_variables.ipynb",
+      "logic": "Renamed from hahnasa_aheret. Missing values replaced with 0.",
+      "inputs": ["hahnasa_aheret"],
+      "code": "tbl_hahnsotpratt87_21.rename(\n    columns={'hahnasa_aheret': 'other_wage_s2'},\n    inplace=True\n)"
+    },
+    {
+      "name": "selfowned_income_s2",
+      "definition": "Income received directly from a self-owned business",
+      "type": "capital",
+      "source": "tbl_source",
+      "notebook": "compute_income_variables.ipynb",
+      "logic": "RevahGolmi for specific SugTikShatMas codes (10, 20, 40, 41, 42, 43, 52, 53, 91, 96, 98).",
+      "inputs": ["RevahGolmi", "SugTikShatMas"],
+      "code": "# selfowned_income_s2 = RevahGolmi\n# where SugTikShatMas in [10, 20, 40, 41, 42, 43, 52, 53, 91, 96, 98]"
+    },
+    {
+      "name": "property_income_s2",
+      "definition": "Property income (dividends, rent, interest)",
+      "type": "capital",
+      "source": "tbl_hahnsotpratt87_21",
+      "notebook": "compute_income_variables.ipynb",
+      "logic": "HahnasaHonitAheret + HahnasaLeLoYilshit",
+      "inputs": ["HahnasaHonitAheret", "HahnasaLeLoYilshit"],
+      "code": "# property_income_s2 = HahnasaHonitAheret + HahnasaLeLoYilshit"
+    },
+    {
+      "name": "tax_report",
+      "definition": "Binary variable: whether individual filed a tax report",
+      "type": "demographics",
+      "source": "tbl_hahnsotpratt87_21",
+      "notebook": "compute_income_variables.ipynb",
+      "logic": "1 if the individual appears in the tax file, 0 otherwise.",
+      "inputs": [],
+      "code": "# Binary indicator for tax filing"
+    },
+    {
+      "name": "labor_income_s2",
+      "definition": "Total labor income",
+      "type": "wage",
+      "source": "tbl_hahnsotpratt87_21",
+      "notebook": "compute_income_variables.ipynb",
+      "logic": "Sum of wages_s2 and other_wage_s2. Missing values handled with min_count=1.",
+      "inputs": ["wages_s2", "other_wage_s2"],
+      "code": "tbl_hahnsotpratt87_21['labor_income_s2'] = (\n    tbl_hahnsotpratt87_21[['wages_s2', 'other_wage_s2']]\n    .sum(axis=1, min_count=1)\n)"
+    },
+    {
+      "name": "capital_income_s2",
+      "definition": "Total capital income",
+      "type": "capital",
+      "source": "tbl_hahnsotpratt87_21, tbl_source",
+      "notebook": "compute_income_variables.ipynb",
+      "logic": "Sum of selfowned_income_s2, property_income_s2, and capital_gains_s2.",
+      "inputs": ["selfowned_income_s2", "property_income_s2", "capital_gains_s2"],
+      "code": "merged_df['capital_income_s2'] = merged_df[[\n    'selfowned_income_s2',\n    'property_income_s2',\n    'capital_gains_s2'\n]].sum(axis=1, min_count=1)"
+    },
+    {
+      "name": "total_income_s2",
+      "definition": "Total income (labor + capital + business)",
+      "type": "wage, capital",
+      "source": "tbl_hahnsotpratt87_21, tbl_source",
+      "notebook": "compute_income_variables.ipynb",
+      "logic": "Sum of labor_income_s2, capital_income_s2, and business_income_s2.",
+      "inputs": ["labor_income_s2", "capital_income_s2", "business_income_s2"],
+      "code": "merged_df['total_income_s2'] = merged_df[[\n    'labor_income_s2',\n    'capital_income_s2',\n    'business_income_s2'\n]].sum(axis=1, min_count=1)"
+    },
+    {
+      "name": "total_income_r1_s2",
+      "definition": "Total income variant r1 (wages + capital + business)",
+      "type": "wage, capital",
+      "source": "tbl_hahnsotpratt87_21, tbl_source",
+      "notebook": "compute_income_variables.ipynb",
+      "logic": "Sum of wages_s2, capital_income_s2, and business_income_s2.",
+      "inputs": ["wages_s2", "capital_income_s2", "business_income_s2"],
+      "code": "merged_df['total_income_r1_s2'] = merged_df[[\n    'wages_s2',\n    'capital_income_s2',\n    'business_income_s2'\n]].sum(axis=1, min_count=1)"
+    },
+    {
+      "name": "capital_income_r1_s2",
+      "definition": "Capital income variant r1 (property + capital gains only)",
+      "type": "capital",
+      "source": "tbl_hahnsotpratt87_21",
+      "notebook": "compute_income_variables.ipynb",
+      "logic": "Sum of property_income_s2 and capital_gains_s2.",
+      "inputs": ["property_income_s2", "capital_gains_s2"],
+      "code": "merged_df['capital_income_r1_s2'] = merged_df[[\n    'property_income_s2',\n    'capital_gains_s2'\n]].sum(axis=1, min_count=1)"
+    },
+    {
+      "name": "total_income_r2_s2",
+      "definition": "Total income variant r2 (wages + capital_r1 + business)",
+      "type": "wage, capital",
+      "source": "tbl_hahnsotpratt87_21, tbl_source",
+      "notebook": "compute_income_variables.ipynb",
+      "logic": "Sum of wages_s2, capital_income_r1_s2, and business_income_s2.",
+      "inputs": ["wages_s2", "capital_income_r1_s2", "business_income_s2"],
+      "code": "merged_df['total_income_r2_s2'] = merged_df[[\n    'wages_s2',\n    'capital_income_r1_s2',\n    'business_income_s2'\n]].sum(axis=1, min_count=1)"
+    }
+  ],
+  "Strategy 4": [
+    {
+      "name": "hafra_oved_kitsva",
+      "definition": "Amount of employee contributions to a comprehensive pension",
+      "type": "benefits",
+      "source": "tbl_misrot27_21",
+      "notebook": null,
+      "logic": "CBS source variable (no transformation).",
+      "inputs": [],
+      "code": "# CBS source variable — used directly from tbl_misrot27_21",
+      "tag": "CBS source"
+    },
+    {
+      "name": "hafra_oved_ovdan",
+      "definition": "Amount of employee contributions for disability insurance",
+      "type": "benefits",
+      "source": "tbl_misrot27_21",
+      "notebook": null,
+      "logic": "CBS source variable (no transformation).",
+      "inputs": [],
+      "code": "# CBS source variable — used directly from tbl_misrot27_21",
+      "tag": "CBS source"
+    },
+    {
+      "name": "hafra_mavid_kitsva",
+      "definition": "Amount of employer contributions to a comprehensive pension",
+      "type": "benefits",
+      "source": "tbl_misrot27_21",
+      "notebook": null,
+      "logic": "CBS source variable (no transformation).",
+      "inputs": [],
+      "code": "# CBS source variable — used directly from tbl_misrot27_21",
+      "tag": "CBS source"
+    },
+    {
+      "name": "hafra_mavid_ovdan",
+      "definition": "Amount of employer contributions for disability insurance",
+      "type": "benefits",
+      "source": "tbl_misrot27_21",
+      "notebook": null,
+      "logic": "CBS source variable (no transformation).",
+      "inputs": [],
+      "code": "# CBS source variable — used directly from tbl_misrot27_21",
+      "tag": "CBS source"
+    },
+    {
+      "name": "pension_employer_s4",
+      "definition": "Employer contributions for pension (comprehensive + disability)",
+      "type": "benefits",
+      "source": "tbl_misrot27_21",
+      "notebook": "strategy_4_creates_variables_1.ipynb",
+      "logic": "Sum of hafra_mavid_kitsva and hafra_mavid_ovdan, each clipped at 0 (negatives removed), missing set to 0.",
+      "inputs": ["hafra_mavid_kitsva", "hafra_mavid_ovdan"],
+      "code": "df['pension_employer_s4'] = (\n    df['hafra_mavid_kitsva'].clip(lower=0).fillna(0)\n    + df['hafra_mavid_ovdan'].clip(lower=0).fillna(0)\n)"
+    },
+    {
+      "name": "pension_employee_s4",
+      "definition": "Employee contributions for pension (comprehensive + disability)",
+      "type": "benefits",
+      "source": "tbl_misrot27_21",
+      "notebook": "strategy_4_creates_variables_1.ipynb",
+      "logic": "Sum of hafra_oved_kitsva and hafra_oved_ovdan, each clipped at 0, missing set to 0.",
+      "inputs": ["hafra_oved_kitsva", "hafra_oved_ovdan"],
+      "code": "df['pension_employee_s4'] = (\n    df['hafra_oved_kitsva'].clip(lower=0).fillna(0)\n    + df['hafra_oved_ovdan'].clip(lower=0).fillna(0)\n)"
+    },
+    {
+      "name": "public_sector",
+      "definition": "Whether the firm is in the public sector (1) or private (0)",
+      "type": "demographics",
+      "source": "tbl_misrot27_21",
+      "notebook": "strategy_4_creates_variables_1.ipynb",
+      "logic": "Set to 1 for specific SectorMeuchad codes (110010, 110015, 121000, 131100, 131110, 131300, 131400, 131500). Set to 0 for private sector codes and range 122010–129030.",
+      "inputs": ["SectorMeuchad"],
+      "code": "df['public_sector'] = np.nan\n\npublic_sector_codes = [\n    110010, 110015, 121000, 131100,\n    131110, 131300, 131400, 131500\n]\ndf.loc[\n    df['SectorMeuchad'].isin(public_sector_codes),\n    'public_sector'\n] = 1\n\nprivate_sector_codes = [\n    110020, 110021, 110030, 140000,\n    150020, 150030, 999999\n]\nrange_condition = (\n    (df['SectorMeuchad'] >= 122010)\n    & (df['SectorMeuchad'] <= 129030)\n)\ndf.loc[\n    df['SectorMeuchad'].isin(private_sector_codes)\n    | range_condition,\n    'public_sector'\n] = 0"
+    },
+    {
+      "name": "tenure",
+      "definition": "Years of tenure at current firm",
+      "type": "demographics",
+      "source": "tbl_misrot27_21",
+      "notebook": "strategy_4_creates_variables_1.ipynb",
+      "logic": "Current year minus prat_shnat_avodaStart, only when start year is non-missing and >= 0.",
+      "inputs": ["shana", "prat_shnat_avodaStart"],
+      "code": "df['tenure'] = np.where(\n    (pd.notna(df['prat_shnat_avodaStart']))\n    & (df['prat_shnat_avodaStart'] >= 0),\n    df['shana'] - df['prat_shnat_avodaStart'],\n    np.nan\n)"
+    },
+    {
+      "name": "pension_budgetary_s4",
+      "definition": "Budgetary pension for public sector workers who started before 2004",
+      "type": "benefits",
+      "source": "tbl_misrot27_21",
+      "notebook": "strategy_4_creates_variables_1.ipynb",
+      "logic": "2% × masc_basis_kitsva × tenure, only for public sector workers who started before 2004 and have positive masc_basis_kitsva. Otherwise 0.",
+      "inputs": ["masc_basis_kitsva", "tenure", "public_sector", "prat_shnat_avodaStart"],
+      "code": "df['pension_budgetary_s4'] = 0\n\nmask = (\n    (df['masc_basis_kitsva'] > 0)\n    & (df['prat_shnat_avodaStart'] < 2004)\n    & (df['public_sector'] == 1)\n)\n\ndf.loc[mask, 'pension_budgetary_s4'] = (\n    0.02\n    * df.loc[mask, 'masc_basis_kitsva']\n    * df.loc[mask, 'tenure']\n)"
+    },
+    {
+      "name": "pension_all_s4",
+      "definition": "Total pension contributions (employer + employee + budgetary)",
+      "type": "benefits",
+      "source": "tbl_misrot27_21",
+      "notebook": "strategy_4_creates_variables_1.ipynb",
+      "logic": "Sum of pension_employer_s4, pension_employee_s4, pension_budgetary_s4. Missing filled with 0.",
+      "inputs": ["pension_employer_s4", "pension_employee_s4", "pension_budgetary_s4"],
+      "code": "df['pension_all_s4'] = df[[\n    'pension_employer_s4',\n    'pension_employee_s4',\n    'pension_budgetary_s4'\n]].sum(axis=1, min_count=1)\ndf['pension_all_s4'] = df['pension_all_s4'].fillna(0)"
+    },
+    {
+      "name": "hafra_mavid_hish",
+      "definition": "Amount of employer contributions to study fund (keren hishtalmut)",
+      "type": "benefits",
+      "source": "tbl_misrot27_21",
+      "notebook": null,
+      "logic": "CBS source variable (no transformation).",
+      "inputs": [],
+      "code": "# CBS source variable — used directly from tbl_misrot27_21",
+      "tag": "CBS source"
+    },
+    {
+      "name": "hafra_oved_hish",
+      "definition": "Amount of employee contributions to study fund (keren hishtalmut)",
+      "type": "benefits",
+      "source": "tbl_misrot27_21",
+      "notebook": null,
+      "logic": "CBS source variable (no transformation).",
+      "inputs": [],
+      "code": "# CBS source variable — used directly from tbl_misrot27_21",
+      "tag": "CBS source"
+    },
+    {
+      "name": "kh_employer_s4",
+      "definition": "Employer study fund contributions (keren hishtalmut), cleaned",
+      "type": "benefits",
+      "source": "tbl_misrot27_21",
+      "notebook": "strategy_4_creates_variables_1.ipynb",
+      "logic": "hafra_mavid_hish when positive, 0 otherwise.",
+      "inputs": ["hafra_mavid_hish"],
+      "code": "df['kh_employer_s4'] = 0\nmask = df['hafra_mavid_hish'] > 0\ndf.loc[mask, 'kh_employer_s4'] = (\n    df.loc[mask, 'hafra_mavid_hish']\n)"
+    },
+    {
+      "name": "kh_employee_s4",
+      "definition": "Employee study fund contributions (keren hishtalmut), cleaned",
+      "type": "benefits",
+      "source": "tbl_misrot27_21",
+      "notebook": "strategy_4_creates_variables_1.ipynb",
+      "logic": "hafra_oved_hish when positive, 0 otherwise.",
+      "inputs": ["hafra_oved_hish"],
+      "code": "df['kh_employee_s4'] = 0\nmask = df['hafra_oved_hish'] > 0\ndf.loc[mask, 'kh_employee_s4'] = (\n    df.loc[mask, 'hafra_oved_hish']\n)"
+    },
+    {
+      "name": "kh_all_s4",
+      "definition": "Total study fund contributions (employer + employee)",
+      "type": "benefits",
+      "source": "tbl_misrot27_21",
+      "notebook": "strategy_4_creates_variables_1.ipynb",
+      "logic": "Sum of kh_employer_s4 and kh_employee_s4. Missing filled with 0.",
+      "inputs": ["kh_employer_s4", "kh_employee_s4"],
+      "code": "df['kh_all_s4'] = df[[\n    'kh_employer_s4',\n    'kh_employee_s4'\n]].sum(axis=1, min_count=1)\ndf['kh_all_s4'] = df['kh_all_s4'].fillna(0)"
+    },
+    {
+      "name": "benefits_1_s4",
+      "definition": "Total employer benefits (pension + study fund)",
+      "type": "benefits",
+      "source": "tbl_misrot27_21",
+      "notebook": "strategy_4_creates_variables_2.ipynb",
+      "logic": "Sum of pension_all_s4 and kh_all_s4. Missing filled with 0.",
+      "inputs": ["pension_all_s4", "kh_all_s4"],
+      "code": "df['benefits_1_s4'] = df[[\n    'pension_all_s4',\n    'kh_all_s4'\n]].sum(axis=1, min_count=1)\ndf['benefits_1_s4'] = df['benefits_1_s4'].fillna(0)"
+    },
+    {
+      "name": "benefits_1_allocated_s4",
+      "definition": "Allocated benefits: 14% of firm labor costs distributed by wage share",
+      "type": "benefits",
+      "source": "tbl_misrot27_21, firm data",
+      "notebook": "strategy_4_creates_variables_2.ipynb",
+      "logic": "14% of labor_costs_leep distributed to workers according to their wage share within the firm (wages_s2 / sum of firm wages).",
+      "inputs": ["labor_costs_leep", "wages_s2", "firm_id"],
+      "code": "df['labor_costs_leep'] = df['labor_costs_leep'].fillna(0)\nlabor_costs_14_pct = df['labor_costs_leep'] * 0.14\n\ndf['benefits_1_allocated_s4'] = 0\n\nsum_wages = df.groupby('firm_id')[\n    'wages_s2'\n].transform('sum')\n\ndf['wage_share'] = df['wages_s2'] / sum_wages\n\ndf['benefits_1_allocated_s4'] = (\n    df['wage_share'] * labor_costs_14_pct\n)\ndf = df.drop(['wage_share'], axis=1)\ndf['benefits_1_allocated_s4'] = (\n    df['benefits_1_allocated_s4'].fillna(0)\n)"
+    },
+    {
+      "name": "benefits_2_s4",
+      "definition": "Combined benefits (direct + allocated)",
+      "type": "benefits",
+      "source": "tbl_misrot27_21, firm data",
+      "notebook": "strategy_4_creates_variables_2.ipynb",
+      "logic": "Sum of benefits_1_s4 and benefits_1_allocated_s4. Missing filled with 0.",
+      "inputs": ["benefits_1_s4", "benefits_1_allocated_s4"],
+      "code": "df['benefits_2_s4'] = df[[\n    'benefits_1_s4',\n    'benefits_1_allocated_s4'\n]].sum(axis=1, min_count=1)\ndf['benefits_2_s4'] = df['benefits_2_s4'].fillna(0)"
+    },
+    {
+      "name": "labor_income_s4",
+      "definition": "Total labor income including benefits (wages + benefits)",
+      "type": "wage",
+      "source": "tbl_hahnsotpratt87_21, tbl_misrot27_21",
+      "notebook": "strategy_4_creates_variables_2.ipynb",
+      "logic": "Sum of wages_s2 and benefits_2_s4. Missing filled with 0.",
+      "inputs": ["wages_s2", "benefits_2_s4"],
+      "code": "df['labor_income_s4'] = df[[\n    'wages_s2',\n    'benefits_2_s4'\n]].sum(axis=1, min_count=1)\ndf['labor_income_s4'] = df['labor_income_s4'].fillna(0)"
+    },
+    {
+      "name": "profits_5_s4",
+      "definition": "Distributed firm profits (top-10% earners in large firms, equal in small firms)",
+      "type": "capital",
+      "source": "firm data",
+      "notebook": "strategy_4_creates_variables_2.ipynb",
+      "logic": "For firms with 20+ workers: profits distributed to top 10% earners by wage share. For firms <20: distributed equally. Self-owned income subtracted.",
+      "inputs": ["profits_mirsham", "wages_s2", "firm_id", "selfowned_income_s2"],
+      "code": "df['firm_size'] = df.groupby('firm_id')[\n    'MisparTeudatZehut_fic'\n].transform('count')\n\nsmall_firm_mask = df['firm_size'] < 20\n\ndf['wage_percentile'] = df.groupby('firm_id')[\n    'wages_s2'\n].transform(lambda x: x.rank(pct=True))\n\ntop_10_mask = (\n    (df['wage_percentile'] >= 0.9)\n    & (~small_firm_mask)\n)\n\ndf['profits_5_s4'] = 0\n\n# Large firms: top 10% by wage share\nsum_top_wages = df[top_10_mask].groupby(\n    'firm_id'\n)['wages_s2'].transform('sum')\ndf.loc[top_10_mask, 'wage_share'] = (\n    df.loc[top_10_mask, 'wages_s2']\n    / sum_top_wages\n)\ndf.loc[top_10_mask, 'profits_5_s4'] = (\n    df.loc[top_10_mask, 'wage_share']\n    * df.loc[top_10_mask, 'profits_mirsham']\n)\n\n# Small firms: equal distribution\ndf.loc[small_firm_mask, 'profits_5_s4'] = (\n    df.loc[small_firm_mask, 'profits_mirsham']\n    / df.loc[small_firm_mask, 'firm_size']\n)\n\ndf['profits_5_s4'] = (\n    df['profits_5_s4']\n    - df['selfowned_income_s2'].fillna(0)\n)\ndf['profits_5_s4'] = df['profits_5_s4'].fillna(0)"
+    },
+    {
+      "name": "profits_6_s4",
+      "definition": "Distributed firm profits (historical positive-income-property workers)",
+      "type": "capital",
+      "source": "firm data",
+      "notebook": "strategy_4_creates_variables_2.ipynb",
+      "logic": "Distributed using historical records of workers with positive property income. Self-owned income subtracted.",
+      "inputs": ["profits_mirsham", "firm_id", "selfowned_income_s2"],
+      "code": "df = create_profits_6_s4(\n    df,\n    firm_positive_income_property_workers_history,\n    year_int\n)\ndf['profits_6_s4'] = (\n    df['profits_6_s4']\n    - df['selfowned_income_s2'].fillna(0)\n)\ndf['profits_6_s4'] = df['profits_6_s4'].fillna(0)"
+    },
+    {
+      "name": "capital_income_4_s4",
+      "definition": "Capital income (property + self-owned business)",
+      "type": "capital",
+      "source": "tbl_hahnsotpratt87_21, tbl_source",
+      "notebook": "strategy_4_creates_variables_2.ipynb",
+      "logic": "Sum of property_income_s3 and selfowned_income_s2.",
+      "inputs": ["property_income_s3", "selfowned_income_s2"],
+      "code": "df['capital_income_4_s4'] = df[[\n    'property_income_s3',\n    'selfowned_income_s2'\n]].sum(axis=1, min_count=1)\ndf['capital_income_4_s4'] = (\n    df['capital_income_4_s4'].fillna(0)\n)"
+    },
+    {
+      "name": "capital_income_5_s4",
+      "definition": "Capital income including distributed profits (property + profits_6 + self-owned)",
+      "type": "capital",
+      "source": "tbl_hahnsotpratt87_21, tbl_source, firm data",
+      "notebook": "strategy_4_creates_variables_2.ipynb",
+      "logic": "Sum of property_income_s3, profits_6_s4, and selfowned_income_s2.",
+      "inputs": ["property_income_s3", "profits_6_s4", "selfowned_income_s2"],
+      "code": "df['capital_income_5_s4'] = df[[\n    'property_income_s3',\n    'profits_6_s4',\n    'selfowned_income_s2'\n]].sum(axis=1, min_count=1)\ndf['capital_income_5_s4'] = (\n    df['capital_income_5_s4'].fillna(0)\n)"
+    },
+    {
+      "name": "total_income_2_s4",
+      "definition": "Total income (labor + property + business)",
+      "type": "wage, capital",
+      "source": "tbl_hahnsotpratt87_21, tbl_misrot27_21",
+      "notebook": "strategy_4_creates_variables_2.ipynb",
+      "logic": "Sum of labor_income_s4, property_income_s3, and business_income_s2.",
+      "inputs": ["labor_income_s4", "property_income_s3", "business_income_s2"],
+      "code": "df['total_income_2_s4'] = df[[\n    'labor_income_s4',\n    'property_income_s3',\n    'business_income_s2'\n]].sum(axis=1, min_count=1)\ndf['total_income_2_s4'] = (\n    df['total_income_2_s4'].fillna(0)\n)"
+    },
+    {
+      "name": "income_nonfilers_s4",
+      "definition": "Imputed income for non-filers (30% of average total_income_2_s4)",
+      "type": "wage",
+      "source": "computed",
+      "notebook": "strategy_4_creates_variables_2.ipynb",
+      "logic": "For rows where added_rows == 1 (non-filers): set to 30% of mean total_income_2_s4. Otherwise 0.",
+      "inputs": ["total_income_2_s4", "added_rows"],
+      "code": "avg = df['total_income_2_s4'].mean()\ndf['income_nonfilers_s4'] = 0\ndf.loc[\n    df['added_rows'] == 1,\n    'income_nonfilers_s4'\n] = avg * 0.3"
+    },
+    {
+      "name": "total_income_5_s4",
+      "definition": "Total income including distributed profits",
+      "type": "wage, capital",
+      "source": "tbl_hahnsotpratt87_21, tbl_misrot27_21, firm data",
+      "notebook": "strategy_4_creates_variables_2.ipynb",
+      "logic": "Sum of labor_income_s4, property_income_s3, business_income_s2, selfowned_income_s2, and profits_6_s4.",
+      "inputs": ["labor_income_s4", "property_income_s3", "business_income_s2", "selfowned_income_s2", "profits_6_s4"],
+      "code": "df['total_income_5_s4'] = df[[\n    'labor_income_s4',\n    'property_income_s3',\n    'business_income_s2',\n    'selfowned_income_s2',\n    'profits_6_s4'\n]].sum(axis=1, min_count=1)\ndf['total_income_5_s4'] = (\n    df['total_income_5_s4'].fillna(0)\n)"
+    },
+    {
+      "name": "total_income_6_s4",
+      "definition": "Total income including profits and non-filer imputation",
+      "type": "wage, capital",
+      "source": "tbl_hahnsotpratt87_21, tbl_misrot27_21, firm data",
+      "notebook": "strategy_4_creates_variables_2.ipynb",
+      "logic": "Sum of labor_income_s4, property_income_s3, business_income_s2, selfowned_income_s2, profits_6_s4, and income_nonfilers_s4.",
+      "inputs": ["labor_income_s4", "property_income_s3", "business_income_s2", "selfowned_income_s2", "profits_6_s4", "income_nonfilers_s4"],
+      "code": "df['total_income_6_s4'] = df[[\n    'labor_income_s4',\n    'property_income_s3',\n    'business_income_s2',\n    'selfowned_income_s2',\n    'profits_6_s4',\n    'income_nonfilers_s4'\n]].sum(axis=1, min_count=1)\ndf['total_income_6_s4'] = (\n    df['total_income_6_s4'].fillna(0)\n)"
+    }
+  ]
+}
