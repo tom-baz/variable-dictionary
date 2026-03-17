@@ -2,7 +2,7 @@
   "Strategy 2": [
     {
       "name": "wages_s2",
-      "definition": "Annual wage income",
+      "definition": "Annual wage and salary income",
       "type": "wage",
       "source": "tbl_hahnsotpratt87_21",
       "notebook": "compute_income_variables.ipynb",
@@ -12,7 +12,7 @@
     },
     {
       "name": "business_income_s2",
-      "definition": "Annual business income (self-employment)",
+      "definition": "Annual self-employment income",
       "type": "wage",
       "source": "tbl_hahnsotpratt87_21",
       "notebook": "compute_income_variables.ipynb",
@@ -22,7 +22,7 @@
     },
     {
       "name": "capital_gains_s2",
-      "definition": "Annual capital income",
+      "definition": "Annual capital gains income",
       "type": "capital",
       "source": "tbl_hahnsotpratt87_21",
       "notebook": "compute_income_variables.ipynb",
@@ -42,7 +42,7 @@
     },
     {
       "name": "other_wage_s2",
-      "definition": "Other annual wage income",
+      "definition": "Labor income from a former employment relation (e.g., pension)",
       "type": "wage",
       "source": "tbl_hahnsotpratt87_21",
       "notebook": "compute_income_variables.ipynb",
@@ -56,43 +56,43 @@
       "type": "capital",
       "source": "tbl_source",
       "notebook": "compute_income_variables.ipynb",
-      "logic": "RevahGolmi for specific SugTikShatMas codes (10, 20, 40, 41, 42, 43, 52, 53, 91, 96, 98).",
+      "logic": "RevahGolmi for individuals whose SugTikShatMas (tax file type) is one of: 10, 20, 40, 41, 42, 43, 52, 53, 91, 96, 98. These codes identify self-employed business owners filing specific tax form types.",
       "inputs": ["RevahGolmi", "SugTikShatMas"],
       "code": "# selfowned_income_s2 = RevahGolmi\n# where SugTikShatMas in [10, 20, 40, 41, 42, 43, 52, 53, 91, 96, 98]"
     },
     {
       "name": "property_income_s2",
-      "definition": "Property income (dividends, rent, interest)",
+      "definition": "Property income: dividends, rent, and interest",
       "type": "capital",
       "source": "tbl_hahnsotpratt87_21",
       "notebook": "compute_income_variables.ipynb",
-      "logic": "HahnasaHonitAheret + HahnasaLeLoYilshit",
+      "logic": "Sum of HahnasaHonitAheret (other capital income including dividends) and HahnasaLeLoYilshit (tax-exempt income, primarily rent and interest).",
       "inputs": ["HahnasaHonitAheret", "HahnasaLeLoYilshit"],
       "code": "# property_income_s2 = HahnasaHonitAheret + HahnasaLeLoYilshit"
     },
     {
       "name": "tax_report",
-      "definition": "Binary variable: whether individual filed a tax report",
+      "definition": "Binary variable: whether individual filed a tax report (form 1301) versus being reported only in employer form 106",
       "type": "demographics",
       "source": "tbl_hahnsotpratt87_21",
       "notebook": "compute_income_variables.ipynb",
-      "logic": "1 if the individual appears in the tax file, 0 otherwise.",
-      "inputs": [],
+      "logic": "Set to 1 if any of the following 8 variables is greater than 0: Hahnasa_Aheret, HahnasaHonit, HahnasaHonitAheret, HahnasaIskit, HahnasaLeLoYilshit, HahnasaNehe, HachnasaPtura, RevahGolmi. Set to 0 otherwise. Distinguishes tax filers from wage-only individuals.",
+      "inputs": ["Hahnasa_Aheret", "HahnasaHonit", "HahnasaHonitAheret", "HahnasaIskit", "HahnasaLeLoYilshit", "HahnasaNehe", "HachnasaPtura", "RevahGolmi"],
       "code": "# Binary indicator for tax filing"
     },
     {
       "name": "labor_income_s2",
-      "definition": "Total labor income",
+      "definition": "Total labor income (wages and labor income from former employment)",
       "type": "wage",
       "source": "tbl_hahnsotpratt87_21",
       "notebook": "compute_income_variables.ipynb",
-      "logic": "Sum of wages_s2 and other_wage_s2. Missing values handled with min_count=1.",
+      "logic": "Sum of wages_s2 (HahnasaSahar) and other_wage_s2 (Hahnasa_Aheret, e.g., pension from former employment). Missing values handled with min_count=1.",
       "inputs": ["wages_s2", "other_wage_s2"],
       "code": "tbl_hahnsotpratt87_21['labor_income_s2'] = (\n    tbl_hahnsotpratt87_21[['wages_s2', 'other_wage_s2']]\n    .sum(axis=1, min_count=1)\n)"
     },
     {
       "name": "capital_income_s2",
-      "definition": "Total capital income",
+      "definition": "Total capital income (self-owned business + property + capital gains)",
       "type": "capital",
       "source": "tbl_hahnsotpratt87_21, tbl_source",
       "notebook": "compute_income_variables.ipynb",
@@ -112,21 +112,21 @@
     },
     {
       "name": "total_income_r1_s2",
-      "definition": "Total income variant r1 (wages + capital + business)",
+      "definition": "Total income variant r1 (wages + capital + business, excluding other labor income)",
       "type": "wage, capital",
       "source": "tbl_hahnsotpratt87_21, tbl_source",
       "notebook": "compute_income_variables.ipynb",
-      "logic": "Sum of wages_s2, capital_income_s2, and business_income_s2.",
+      "logic": "Sum of wages_s2, capital_income_s2, and business_income_s2. Uses wages_s2 instead of labor_income_s2, excluding other_wage_s2.",
       "inputs": ["wages_s2", "capital_income_s2", "business_income_s2"],
       "code": "merged_df['total_income_r1_s2'] = merged_df[[\n    'wages_s2',\n    'capital_income_s2',\n    'business_income_s2'\n]].sum(axis=1, min_count=1)"
     },
     {
       "name": "capital_income_r1_s2",
-      "definition": "Capital income variant r1 (property + capital gains only)",
+      "definition": "Capital income variant r1 (property + capital gains only, excluding self-owned business)",
       "type": "capital",
       "source": "tbl_hahnsotpratt87_21",
       "notebook": "compute_income_variables.ipynb",
-      "logic": "Sum of property_income_s2 and capital_gains_s2.",
+      "logic": "Sum of property_income_s2 and capital_gains_s2. Excludes selfowned_income_s2.",
       "inputs": ["property_income_s2", "capital_gains_s2"],
       "code": "merged_df['capital_income_r1_s2'] = merged_df[[\n    'property_income_s2',\n    'capital_gains_s2'\n]].sum(axis=1, min_count=1)"
     },
@@ -136,12 +136,234 @@
       "type": "wage, capital",
       "source": "tbl_hahnsotpratt87_21, tbl_source",
       "notebook": "compute_income_variables.ipynb",
-      "logic": "Sum of wages_s2, capital_income_r1_s2, and business_income_s2.",
+      "logic": "Sum of wages_s2, capital_income_r1_s2, and business_income_s2. Uses capital_income_r1_s2 which excludes self-owned business income.",
       "inputs": ["wages_s2", "capital_income_r1_s2", "business_income_s2"],
       "code": "merged_df['total_income_r2_s2'] = merged_df[[\n    'wages_s2',\n    'capital_income_r1_s2',\n    'business_income_s2'\n]].sum(axis=1, min_count=1)"
     }
   ],
+  "Strategy 3": [
+    {
+      "name": "benefits_allocated_s3",
+      "definition": "Benefits allocated from national accounts to individuals (fringe benefits)",
+      "type": "benefits",
+      "source": "national accounts",
+      "notebook": null,
+      "logic": "Fringe benefits at the national level equal labor compensation minus employers' social contribution to national insurance and health tax minus all individual taxed wages minus other labor income. Amount from national accounts Row 52 (in million NIS). Allocated to individuals according to the distribution of wages_s2.",
+      "inputs": ["wages_s2"],
+      "code": ""
+    },
+    {
+      "name": "benefits_allocated_r1_s3",
+      "definition": "Benefits allocated from national accounts (alternative: labor compensation less social contributions less wages)",
+      "type": "benefits",
+      "source": "national accounts",
+      "notebook": null,
+      "logic": "Fringe benefits at the national level equal labor compensation less employers' social contribution to national insurance and health tax less all individual taxed wages. Amount from national accounts Row n.45 (in million NIS). Allocated to individuals according to the distribution of wages_s2.",
+      "inputs": ["wages_s2"],
+      "code": ""
+    },
+    {
+      "name": "labor_income_s3",
+      "definition": "Total labor income including allocated benefits",
+      "type": "wage",
+      "source": "computed",
+      "notebook": null,
+      "logic": "Sum of labor_income_s2 and benefits_allocated_s3.",
+      "inputs": ["labor_income_s2", "benefits_allocated_s3"],
+      "code": ""
+    },
+    {
+      "name": "labor_income_r1_s3",
+      "definition": "Labor income variant r1 (wages + alternative benefits allocation)",
+      "type": "wage",
+      "source": "computed",
+      "notebook": null,
+      "logic": "Sum of wages_s2 and benefits_allocated_r1_s3.",
+      "inputs": ["wages_s2", "benefits_allocated_r1_s3"],
+      "code": ""
+    },
+    {
+      "name": "property_reported_income_s3",
+      "definition": "Total reported property income (property + capital gains)",
+      "type": "capital",
+      "source": "computed",
+      "notebook": null,
+      "logic": "Sum of property_income_s2 and capital_gains_s2.",
+      "inputs": ["property_income_s2", "capital_gains_s2"],
+      "code": ""
+    },
+    {
+      "name": "property_attributed_rent_s3",
+      "definition": "Tax-exempt housing rent attributed from national accounts",
+      "type": "capital",
+      "source": "national accounts",
+      "notebook": null,
+      "logic": "Tax-exempt housing rent. Amount from national accounts Row n.8 (in million NIS). Distributed among all individuals according to the distribution of property_reported_income_s3 among individuals with property_reported_income_s3 > 0.",
+      "inputs": ["property_reported_income_s3"],
+      "code": ""
+    },
+    {
+      "name": "property_attributed_income_s3",
+      "definition": "Taxable property income attributed to non-filers from national accounts",
+      "type": "capital",
+      "source": "national accounts",
+      "notebook": null,
+      "logic": "Taxable property income of employees who are not required to submit an annual tax report. Amount from national accounts Row n.22 (in million NIS). Distributed among individuals with tax_report=0 according to the distribution of property_reported_income_s3 among individuals with tax_report=1.",
+      "inputs": ["property_reported_income_s3", "tax_report"],
+      "code": ""
+    },
+    {
+      "name": "property_income_s3",
+      "definition": "Total property income (reported + attributed rent)",
+      "type": "capital",
+      "source": "computed",
+      "notebook": null,
+      "logic": "Sum of property_reported_income_s3 and property_attributed_rent_s3.",
+      "inputs": ["property_reported_income_s3", "property_attributed_rent_s3"],
+      "code": ""
+    },
+    {
+      "name": "property_income_r1_s3",
+      "definition": "Total property income variant r1 (reported + attributed rent + attributed income)",
+      "type": "capital",
+      "source": "computed",
+      "notebook": null,
+      "logic": "Sum of property_reported_income_s3, property_attributed_rent_s3, and property_attributed_income_s3.",
+      "inputs": ["property_reported_income_s3", "property_attributed_rent_s3", "property_attributed_income_s3"],
+      "code": ""
+    },
+    {
+      "name": "profits_attributed_income_s3",
+      "definition": "Business profits attributed from national accounts",
+      "type": "capital",
+      "source": "national accounts",
+      "notebook": null,
+      "logic": "Attributed business income (business_income_s2). Amount from national accounts Row n.28 (in million NIS). Distributed among all individuals according to the distribution of property_reported_income_s3 among individuals with property_reported_income_s3 > 0.",
+      "inputs": ["business_income_s2", "property_reported_income_s3"],
+      "code": ""
+    },
+    {
+      "name": "capital_income_s3",
+      "definition": "Total capital income (property + attributed profits + self-owned)",
+      "type": "capital",
+      "source": "computed",
+      "notebook": null,
+      "logic": "Sum of property_income_s3, profits_attributed_income_s3, and selfowned_income_s2.",
+      "inputs": ["property_income_s3", "profits_attributed_income_s3", "selfowned_income_s2"],
+      "code": ""
+    },
+    {
+      "name": "capital_income_r1_s3",
+      "definition": "Capital income variant r1 (property + attributed profits, excluding self-owned)",
+      "type": "capital",
+      "source": "computed",
+      "notebook": null,
+      "logic": "Sum of property_income_s3 and profits_attributed_income_s3.",
+      "inputs": ["property_income_s3", "profits_attributed_income_s3"],
+      "code": ""
+    },
+    {
+      "name": "capital_income_r2_s3",
+      "definition": "Capital income variant r2 (property_r1 + attributed profits)",
+      "type": "capital",
+      "source": "computed",
+      "notebook": null,
+      "logic": "Sum of property_income_r1_s3 and profits_attributed_income_s3.",
+      "inputs": ["property_income_r1_s3", "profits_attributed_income_s3"],
+      "code": ""
+    },
+    {
+      "name": "income_nonfilers_s3",
+      "definition": "Imputed income for non-filers (30% of average total_income_r1_s2)",
+      "type": "demographics",
+      "source": "computed",
+      "notebook": null,
+      "logic": "Set to 0.3 multiplied by the average of total_income_r1_s2. Applied to non-filer observations added from population aggregates.",
+      "inputs": ["total_income_r1_s2"],
+      "code": ""
+    },
+    {
+      "name": "total_income_s3",
+      "definition": "Total income (labor + capital + business + non-filer imputation)",
+      "type": "wage, capital",
+      "source": "computed",
+      "notebook": null,
+      "logic": "Sum of labor_income_s3, capital_income_s3, business_income_s2, and income_nonfilers_s3.",
+      "inputs": ["labor_income_s3", "capital_income_s3", "business_income_s2", "income_nonfilers_s3"],
+      "code": ""
+    },
+    {
+      "name": "total_income_r1_s3",
+      "definition": "Total income variant r1 (labor_r1 + capital + business + non-filers)",
+      "type": "wage, capital",
+      "source": "computed",
+      "notebook": null,
+      "logic": "Sum of labor_income_r1_s3, capital_income_s3, business_income_s2, and income_nonfilers_s3.",
+      "inputs": ["labor_income_r1_s3", "capital_income_s3", "business_income_s2", "income_nonfilers_s3"],
+      "code": ""
+    },
+    {
+      "name": "total_income_r4_s3",
+      "definition": "Total income variant r4 (labor_r1 + property + business)",
+      "type": "wage, capital",
+      "source": "computed",
+      "notebook": null,
+      "logic": "Sum of labor_income_r1_s3, property_income_s3, and business_income_s2.",
+      "inputs": ["labor_income_r1_s3", "property_income_s3", "business_income_s2"],
+      "code": ""
+    },
+    {
+      "name": "total_income_r5_s3",
+      "definition": "Total income variant r5 (labor_r1 + property + business + attributed profits)",
+      "type": "wage, capital",
+      "source": "computed",
+      "notebook": null,
+      "logic": "Sum of labor_income_r1_s3, property_income_s3, business_income_s2, and profits_attributed_income_s3.",
+      "inputs": ["labor_income_r1_s3", "property_income_s3", "business_income_s2", "profits_attributed_income_s3"],
+      "code": ""
+    },
+    {
+      "name": "income_nonfilers_r1_s3",
+      "definition": "Imputed income for non-filers variant r1 (30% of average total_income_r4_s3)",
+      "type": "demographics",
+      "source": "computed",
+      "notebook": null,
+      "logic": "Set to 0.3 multiplied by the average of total_income_r4_s3.",
+      "inputs": ["total_income_r4_s3"],
+      "code": ""
+    },
+    {
+      "name": "total_income_r6_s3",
+      "definition": "Total income variant r6 (labor_r1 + property + business + profits + non-filers_r1)",
+      "type": "wage, capital",
+      "source": "computed",
+      "notebook": null,
+      "logic": "Sum of labor_income_r1_s3, property_income_s3, business_income_s2, profits_attributed_income_s3, and income_nonfilers_r1_s3.",
+      "inputs": ["labor_income_r1_s3", "property_income_s3", "business_income_s2", "profits_attributed_income_s3", "income_nonfilers_r1_s3"],
+      "code": ""
+    }
+  ],
   "Strategy 4": [
+    {
+      "name": "firm_id",
+      "definition": "Firm identifier (actual workplace ID with industry fallback)",
+      "type": "demographics",
+      "source": "tbl_misrot27_21",
+      "notebook": "strategy_4_creates_variables_1.ipynb",
+      "logic": "Coalesce of koteret_mis_tik_fic (actual workplace tax file ID) and pseudo_firm2 (industry 2-digit code). Uses the actual firm ID when available, falling back to industry code when the firm ID is missing.",
+      "inputs": ["koteret_mis_tik_fic", "pseudo_firm2"],
+      "code": "df['firm_id'] = df['koteret_mis_tik_fic'].fillna(\n    df['pseudo_firm2']\n)"
+    },
+    {
+      "name": "firm_size",
+      "definition": "Number of workers per firm per year",
+      "type": "demographics",
+      "source": "tbl_misrot27_21",
+      "notebook": "strategy_4_creates_variables_2.ipynb",
+      "logic": "Count of individual IDs (MisparTeudatZehut_fic) grouped by firm_id. Gives the number of employees in each firm for that year. Used to distinguish small firms (<20) from large firms for profit distribution.",
+      "inputs": ["firm_id", "MisparTeudatZehut_fic"],
+      "code": "df['firm_size'] = df.groupby('firm_id')[\n    'MisparTeudatZehut_fic'\n].transform('count')"
+    },
     {
       "name": "hafra_oved_kitsva",
       "definition": "Amount of employee contributions to a comprehensive pension",
@@ -350,12 +572,12 @@
     },
     {
       "name": "profits_6_s4",
-      "definition": "Distributed firm profits (historical positive-income-property workers)",
+      "definition": "Distributed firm profits (workers with historical positive property income)",
       "type": "capital",
       "source": "firm data",
       "notebook": "strategy_4_creates_variables_2.ipynb",
-      "logic": "Distributed using historical records of workers with positive property income. Self-owned income subtracted.",
-      "inputs": ["profits_mirsham", "firm_id", "selfowned_income_s2"],
+      "logic": "Distributed to current workers with property_income_s3 > 0 and former workers with positive property income history. Profits split equally among eligible workers per firm. Self-owned income subtracted.",
+      "inputs": ["profits_mirsham", "firm_id", "selfowned_income_s2", "property_income_s3"],
       "code": "df = create_profits_6_s4(\n    df,\n    firm_positive_income_property_workers_history,\n    year_int\n)\ndf['profits_6_s4'] = (\n    df['profits_6_s4']\n    - df['selfowned_income_s2'].fillna(0)\n)\ndf['profits_6_s4'] = df['profits_6_s4'].fillna(0)"
     },
     {
@@ -417,6 +639,158 @@
       "logic": "Sum of labor_income_s4, property_income_s3, business_income_s2, selfowned_income_s2, profits_6_s4, and income_nonfilers_s4.",
       "inputs": ["labor_income_s4", "property_income_s3", "business_income_s2", "selfowned_income_s2", "profits_6_s4", "income_nonfilers_s4"],
       "code": "df['total_income_6_s4'] = df[[\n    'labor_income_s4',\n    'property_income_s3',\n    'business_income_s2',\n    'selfowned_income_s2',\n    'profits_6_s4',\n    'income_nonfilers_s4'\n]].sum(axis=1, min_count=1)\ndf['total_income_6_s4'] = (\n    df['total_income_6_s4'].fillna(0)\n)"
+    }
+  ],
+  "Production Classes": [
+    {
+      "name": "large_proprietor_first_def",
+      "definition": "Individuals with capital income in more than 5 years (i.e., 6+ years) between 2006 and 2021",
+      "type": "class",
+      "source": "tbl_hahnsotpratt87_21",
+      "notebook": "large proprietors – first definition.ipynb",
+      "logic": "For each person-year (2006–2021), flag has_capital_income = 1 if HahnasaHonitAheret > 0 or HahnasaHonit > 0 or HahnasaLeLoYilshit > 0 (NaN filled with 0). Count flagged years per person. Set large_proprietor_first_def = 1 if count > 5. Once classified, the label applies to all years.",
+      "inputs": ["HahnasaHonitAheret", "HahnasaHonit", "HahnasaLeLoYilshit"],
+      "code": "tbl_hahnsotpratt87_21['has_capital_income'] = (\n    (tbl_hahnsotpratt87_21['HahnasaHonitAheret'].fillna(0) > 0) |\n    (tbl_hahnsotpratt87_21['HahnasaHonit'].fillna(0) > 0) |\n    (tbl_hahnsotpratt87_21['HahnasaLeLoYilshit'].fillna(0) > 0)\n).astype(int)\n\ndata_filtered = tbl_hahnsotpratt87_21[\n    (tbl_hahnsotpratt87_21['shana'] >= 2006) &\n    (tbl_hahnsotpratt87_21['shana'] <= 2021) &\n    (tbl_hahnsotpratt87_21['MisparTeudatZehut_fic'].notna())\n].copy()\n\nyears_with_capital = data_filtered.groupby(\n    'MisparTeudatZehut_fic'\n)['has_capital_income'].sum().reset_index()\nyears_with_capital.columns = [\n    'MisparTeudatZehut_fic',\n    'years_with_capital_income'\n]\n\nlarge_proprietors_ids = years_with_capital[\n    years_with_capital['years_with_capital_income'] > 5\n]['MisparTeudatZehut_fic'].tolist()\n\nsocial_class_df['large_proprietor_first_def'] = (\n    social_class_df['MisparTeudatZehut_fic']\n    .isin(large_proprietors_ids).astype(int)\n)"
+    },
+    {
+      "name": "small_proprietor",
+      "definition": "Individuals who filed a small-business tax form (SugTikShatMas) in more than 5 years (6+) between 2006 and 2021",
+      "type": "class",
+      "source": "tbl_source",
+      "notebook": "Small proprietors.ipynb",
+      "logic": "For each person-year (2006–2021), flag has_small_business_form = 1 if SugTikShatMas is one of [10, 20, 40, 41, 42, 43, 52, 53, 91, 96, 98]. Count flagged years per person. Set small_proprietor = 1 if count > 5. Once classified, the label applies to all years.",
+      "inputs": ["SugTikShatMas"],
+      "code": "small_business_codes = [\n    10, 20, 40, 41, 42, 43, 52, 53, 91, 96, 98\n]\n\ndata_filtered = tbl_source[\n    (tbl_source['shana'] >= 2006) &\n    (tbl_source['shana'] <= 2021) &\n    (tbl_source['MisparTeudatZehut_fic'].notna())\n].copy()\n\ndata_no_dups = data_filtered.drop_duplicates(\n    subset=['MisparTeudatZehut_fic', 'shana'],\n    keep='first'\n).copy()\n\ndata_no_dups['has_small_business_form'] = (\n    data_no_dups['SugTikShatMas']\n    .isin(small_business_codes).astype(int)\n)\n\nyears_with_forms = data_no_dups.groupby(\n    'MisparTeudatZehut_fic'\n)['has_small_business_form'].sum().reset_index()\nyears_with_forms.columns = [\n    'MisparTeudatZehut_fic',\n    'years_with_small_business_forms'\n]\n\nsmall_proprietors_ids = years_with_forms[\n    years_with_forms['years_with_small_business_forms'] > 5\n]['MisparTeudatZehut_fic'].tolist()\n\nsmall_proprietors_df['small_proprietor'] = (\n    small_proprietors_df['MisparTeudatZehut_fic']\n    .isin(small_proprietors_ids).astype(int)\n)"
+    },
+    {
+      "name": "independent_producer",
+      "definition": "Individuals with self-employment income only (no wages) in more than 5 years (6+) between 1999 and 2021",
+      "type": "class",
+      "source": "tbl_hahnsotpratt87_21",
+      "notebook": "independen producsrs.ipynb",
+      "logic": "For each person-year (1999–2021), flag is_independent_producer = 1 if HahnasaIskit is not missing AND HahnasaSaher is missing. Count flagged years per person. Set independent_producer = 1 if count > 5. Once classified, the label applies to all years.",
+      "inputs": ["HahnasaIskit", "HahnasaSaher"],
+      "code": "data_filtered = tbl_hahnsotpratt87_21[\n    (tbl_hahnsotpratt87_21['shana'] >= 1999) &\n    (tbl_hahnsotpratt87_21['shana'] <= 2021) &\n    (tbl_hahnsotpratt87_21['MisparTeudatZehut_fic'].notna())\n].copy()\n\ndata_no_dups = data_filtered.drop_duplicates(\n    subset=['MisparTeudatZehut_fic', 'shana'],\n    keep='first'\n).copy()\n\ndata_no_dups['is_independent_producer'] = (\n    (data_no_dups['HahnasaIskit'].notna()) &\n    (data_no_dups['HahnasaSaher'].isna())\n).astype(int)\n\nyears_as_independent = data_no_dups.groupby(\n    'MisparTeudatZehut_fic'\n)['is_independent_producer'].sum().reset_index()\nyears_as_independent.columns = [\n    'MisparTeudatZehut_fic',\n    'years_as_independent_producer'\n]\n\nindependent_producers_ids = years_as_independent[\n    years_as_independent['years_as_independent_producer'] > 5\n]['MisparTeudatZehut_fic'].tolist()\n\nindependent_producers_df['independent_producer'] = (\n    independent_producers_df['MisparTeudatZehut_fic']\n    .isin(independent_producers_ids).astype(int)\n)"
+    },
+    {
+      "name": "formal_independent_producer",
+      "definition": "Independent producers with higher education (BA degree or above)",
+      "type": "class",
+      "source": "tbl_hahnsotpratt87_21, tbl_mh2021",
+      "notebook": "independen producsrs.ipynb",
+      "logic": "Sub-class of independent_producer. Set to 1 if independent_producer == 1 and ba == 1 (completed higher education). Education data merged from tbl_mh2021.",
+      "inputs": ["independent_producer", "ba"],
+      "code": "education_data = tbl_mh2021[\n    ['MisparTeudatZehut_fic', 'ba']\n].copy()\neducation_data = education_data[\n    education_data['MisparTeudatZehut_fic'].notna()\n]\neducation_data = education_data.drop_duplicates(\n    subset=['MisparTeudatZehut_fic'], keep='first'\n)\n\nindependent_producers_df = (\n    independent_producers_df.merge(\n        education_data,\n        on='MisparTeudatZehut_fic',\n        how='left'\n    )\n)\n\nindependent_producers_df['formal_independent_producer'] = (\n    (independent_producers_df['independent_producer'] == 1) &\n    (independent_producers_df['ba'] == 1)\n).astype(int)"
+    },
+    {
+      "name": "informal_independent_producer",
+      "definition": "Independent producers without higher education",
+      "type": "class",
+      "source": "tbl_hahnsotpratt87_21, tbl_mh2021",
+      "notebook": "independen producsrs.ipynb",
+      "logic": "Sub-class of independent_producer. Set to 1 if independent_producer == 1 and ba == 0 (no higher education). Education data merged from tbl_mh2021.",
+      "inputs": ["independent_producer", "ba"],
+      "code": "independent_producers_df['informal_independent_producer'] = (\n    (independent_producers_df['independent_producer'] == 1) &\n    (independent_producers_df['ba'] == 0)\n).astype(int)"
+    },
+    {
+      "name": "wage_and_independent_producer",
+      "definition": "Individuals with both wage and self-employment income in more than 5 years (6+) between 1999 and 2021",
+      "type": "class",
+      "source": "tbl_hahnsotpratt87_21",
+      "notebook": "Wage and salary workers and Independent producers.ipynb",
+      "logic": "For each person-year (1999–2021), flag has_mixed_income = 1 if both HahnasaIskit and HahnasaSaher are not missing. Count flagged years per person. Set wage_and_independent_producer = 1 if count > 5. Once classified, the label applies to all years.",
+      "inputs": ["HahnasaIskit", "HahnasaSaher"],
+      "code": "data_filtered = tbl_hahnsotpratt87_21[\n    (tbl_hahnsotpratt87_21['shana'] >= 1999) &\n    (tbl_hahnsotpratt87_21['shana'] <= 2021) &\n    (tbl_hahnsotpratt87_21['MisparTeudatZehut_fic'].notna())\n].copy()\n\ndata_no_dups = data_filtered.drop_duplicates(\n    subset=['MisparTeudatZehut_fic', 'shana'],\n    keep='first'\n).copy()\n\ndata_no_dups['has_mixed_income'] = (\n    (data_no_dups['HahnasaIskit'].notna()) &\n    (data_no_dups['HahnasaSaher'].notna())\n).astype(int)\n\nyears_with_mixed = data_no_dups.groupby(\n    'MisparTeudatZehut_fic'\n)['has_mixed_income'].sum().reset_index()\nyears_with_mixed.columns = [\n    'MisparTeudatZehut_fic',\n    'years_with_mixed_income'\n]\n\nmixed_workers_ids = years_with_mixed[\n    years_with_mixed['years_with_mixed_income'] > 5\n]['MisparTeudatZehut_fic'].tolist()\n\nmixed_workers_df['wage_and_independent_producer'] = (\n    mixed_workers_df['MisparTeudatZehut_fic']\n    .isin(mixed_workers_ids).astype(int)\n)"
+    },
+    {
+      "name": "wage_and_salary_worker",
+      "definition": "Individuals with wage income who do not belong to any other production class (2006–2021)",
+      "type": "class",
+      "source": "tbl_hahnsotpratt87_21",
+      "notebook": "Wage_and_salary_workers.ipynb",
+      "logic": "Set to 1 if HahnasaSaher is not missing and the individual is not classified as large_proprietor_first_def, small_proprietor, independent_producer, or wage_and_independent_producer. Period: 2006–2021.",
+      "inputs": ["HahnasaSaher", "large_proprietor_first_def", "small_proprietor", "independent_producer", "wage_and_independent_producer"],
+      "code": "wage_df['wage_and_salary_worker'] = (\n    (wage_df['has_wage_income'] == 1) &\n    (wage_df['large_proprietor_first_def'] != 1) &\n    (wage_df['small_proprietor'] != 1) &\n    (wage_df['independent_producer'] != 1) &\n    (wage_df['wage_and_independent_producer'] != 1)\n).astype(int)"
+    },
+    {
+      "name": "manager",
+      "definition": "Wage workers who are also managers (SugTikShatMas == 30 in tbl_source AND present in tbl_misrot)",
+      "type": "class",
+      "source": "tbl_source, tbl_misrot27_21",
+      "notebook": "Wage_and_salary_workers.ipynb",
+      "logic": "Sub-class of wage_and_salary_worker. Manager has priority over all other sub-classes. Set to 1 if the individual appears in tbl_source with SugTikShatMas == 30 AND appears in tbl_misrot in the same year. Period: 2006–2021.",
+      "inputs": ["wage_and_salary_worker", "SugTikShatMas"],
+      "code": "source_managers = tbl_source[\n    (tbl_source['MisparTeudatZehut_fic'].notna()) &\n    (tbl_source['SugTikShatMas'] == 30)\n][['MisparTeudatZehut_fic', 'shana']].drop_duplicates()\nsource_managers['in_source_as_manager'] = 1\n\nwage_sub = wage_sub.merge(\n    source_managers,\n    on=['MisparTeudatZehut_fic', 'shana'],\n    how='left'\n)\nwage_sub['in_source_as_manager'] = (\n    wage_sub['in_source_as_manager'].fillna(0).astype(int)\n)\n\nwage_sub['manager'] = (\n    (wage_sub['in_source_as_manager'] == 1) &\n    (wage_sub['in_misrot'] == 1)\n).astype(int)"
+    },
+    {
+      "name": "gig",
+      "definition": "Wage workers in nonstandard employment (daily job, daily/hourly worker, or short tenure with long attachment)",
+      "type": "class",
+      "source": "tbl_misrot27_21",
+      "notebook": "Wage_and_salary_workers.ipynb",
+      "logic": "Sub-class of wage_and_salary_worker. Not a manager. Set to 1 if prat_sug_misra == 3 (daily job), or sug_oved in [2, 3] (before 2019), or worked_month <= 5 and tenure >= 2. Period: 2006–2021.",
+      "inputs": ["wage_and_salary_worker", "manager", "prat_sug_misra", "sug_oved", "worked_month", "tenure"],
+      "code": "cond_job_type = wage_sub['prat_sug_misra'].isin([3])\n\ncond_worker_type = (\n    (wage_sub['shana'] < 2019) &\n    (wage_sub['sug_oved'].isin([2, 3]))\n)\n\ncond_low_months_high_tenure = (\n    (wage_sub['worked_month'] <= 5) &\n    (wage_sub['tenure'] >= 2)\n)\n\nwage_sub['gig'] = (\n    (wage_sub['manager'] != 1) &\n    (cond_job_type | cond_worker_type\n     | cond_low_months_high_tenure)\n).astype(int)"
+    },
+    {
+      "name": "standard",
+      "definition": "Wage workers in standard employment (sole monthly job, 10+ months worked, firm size 20+)",
+      "type": "class",
+      "source": "tbl_misrot27_21",
+      "notebook": "Wage_and_salary_workers.ipynb",
+      "logic": "Sub-class of wage_and_salary_worker. Not a manager or gig. Set to 1 if prat_sug_misra == 1 (sole job) and sug_oved == 1 (monthly worker) and worked_month >= 10 and firm_size >= 20. Period: 2006–2021.",
+      "inputs": ["wage_and_salary_worker", "manager", "gig", "prat_sug_misra", "sug_oved", "worked_month", "firm_size"],
+      "code": "wage_sub['standard'] = (\n    (wage_sub['manager'] != 1) &\n    (wage_sub['gig'] != 1) &\n    (wage_sub['prat_sug_misra'] == 1) &\n    (wage_sub['sug_oved'] == 1) &\n    (wage_sub['worked_month'] >= 10) &\n    (wage_sub['firm_size'] >= 20)\n).astype(int)"
+    },
+    {
+      "name": "gig_standard_mix",
+      "definition": "Wage workers who are neither manager, gig, nor standard (residual sub-class)",
+      "type": "class",
+      "source": "tbl_misrot27_21",
+      "notebook": "Wage_and_salary_workers.ipynb",
+      "logic": "Sub-class of wage_and_salary_worker. Set to 1 if wage_and_salary_worker == 1 and manager != 1 and gig != 1 and standard != 1. Period: 2006–2021.",
+      "inputs": ["wage_and_salary_worker", "manager", "gig", "standard"],
+      "code": "wage_sub['gig_standard_mix'] = (\n    (wage_sub['manager'] != 1) &\n    (wage_sub['gig'] != 1) &\n    (wage_sub['standard'] != 1)\n).astype(int)"
+    },
+    {
+      "name": "out_of_earned_income",
+      "definition": "Individuals not classified into any other production class (residual category in merge)",
+      "type": "class",
+      "source": "computed",
+      "notebook": "Merge_production_classes.ipynb",
+      "logic": "Not a separately computed indicator. In the merge, every person-year starts as 'Out of earned income population' and is overwritten if any class indicator is 1. Those with no indicator remain in this residual category.",
+      "inputs": ["large_proprietor_first_def", "small_proprietor", "independent_producer", "wage_and_independent_producer", "wage_and_salary_worker"],
+      "code": "# Default — everyone starts here\nmerged['production_class'] = (\n    'Out of earned income population'\n)\n# Then higher-priority classes overwrite\n# in reverse priority order (see production_class)"
+    },
+    {
+      "name": "production_class",
+      "definition": "Final mutually exclusive production class label assigned by priority",
+      "type": "class",
+      "source": "computed",
+      "notebook": "Merge_production_classes.ipynb",
+      "logic": "Priority-based assignment (highest wins): 1) Large Proprietor, 2) Small Proprietor, 3) Independent Producer – Formal / Informal / Unknown Education, 4) Wage & Independent Producer, 5) Wage Worker – Manager / Gig / Standard / Gig-Standard Mix, 6) Out of earned income population. Applied in reverse order so higher priority overwrites lower.",
+      "inputs": ["large_proprietor_first_def", "small_proprietor", "independent_producer", "formal_independent_producer", "informal_independent_producer", "wage_and_independent_producer", "wage_and_salary_worker", "manager", "gig", "standard", "gig_standard_mix"],
+      "code": "merged['production_class'] = 'Out of earned income population'\n\n# 5d  Gig/Standard Mix\nmask = (merged['wage_and_salary_worker'] == 1) & (merged['gig_standard_mix'] == 1)\nmerged.loc[mask, 'production_class'] = 'Wage Worker – Gig/Standard Mix'\n\n# 5c  Standard\nmask = (merged['wage_and_salary_worker'] == 1) & (merged['standard'] == 1)\nmerged.loc[mask, 'production_class'] = 'Wage Worker – Standard'\n\n# 5b  Gig\nmask = (merged['wage_and_salary_worker'] == 1) & (merged['gig'] == 1)\nmerged.loc[mask, 'production_class'] = 'Wage Worker – Gig'\n\n# 5a  Manager\nmask = (merged['wage_and_salary_worker'] == 1) & (merged['manager'] == 1)\nmerged.loc[mask, 'production_class'] = 'Wage Worker – Manager'\n\n# 4   Wage & Independent Producer\nmask = merged['wage_and_independent_producer'] == 1\nmerged.loc[mask, 'production_class'] = 'Wage & Independent Producer'\n\n# 3c  Independent Producer – Unknown Education\nmask = (\n    (merged['independent_producer'] == 1) &\n    (merged['formal_independent_producer'] == 0) &\n    (merged['informal_independent_producer'] == 0)\n)\nmerged.loc[mask, 'production_class'] = 'Independent Producer – Unknown Education'\n\n# 3b  Informal\nmask = merged['informal_independent_producer'] == 1\nmerged.loc[mask, 'production_class'] = 'Independent Producer – Informal'\n\n# 3a  Formal\nmask = merged['formal_independent_producer'] == 1\nmerged.loc[mask, 'production_class'] = 'Independent Producer – Formal'\n\n# 2   Small Proprietor\nmask = merged['small_proprietor'] == 1\nmerged.loc[mask, 'production_class'] = 'Small Proprietor'\n\n# 1   Large Proprietor\nmask = merged['large_proprietor_first_def'] == 1\nmerged.loc[mask, 'production_class'] = 'Large Proprietor'"
+    },
+    {
+      "name": "production_class_code",
+      "definition": "Numeric code (1–11) corresponding to the production_class label",
+      "type": "class",
+      "source": "computed",
+      "notebook": "Merge_production_classes.ipynb",
+      "logic": "Maps production_class text to a numeric code: 1 = Large Proprietor, 2 = Small Proprietor, 3 = Independent Producer – Formal, 4 = Independent Producer – Informal, 5 = Independent Producer – Unknown Education, 6 = Wage & Independent Producer, 7 = Wage Worker – Manager, 8 = Wage Worker – Gig, 9 = Wage Worker – Standard, 10 = Wage Worker – Gig/Standard Mix, 11 = Out of earned income population.",
+      "inputs": ["production_class"],
+      "code": "class_codes = {\n    'Large Proprietor':                        1,\n    'Small Proprietor':                        2,\n    'Independent Producer – Formal':           3,\n    'Independent Producer – Informal':         4,\n    'Independent Producer – Unknown Education': 5,\n    'Wage & Independent Producer':             6,\n    'Wage Worker – Manager':                   7,\n    'Wage Worker – Gig':                       8,\n    'Wage Worker – Standard':                  9,\n    'Wage Worker – Gig/Standard Mix':         10,\n    'Out of earned income population':        11\n}\n\nmerged['production_class_code'] = (\n    merged['production_class'].map(class_codes)\n)"
+    },
+    {
+      "name": "production_class_broad",
+      "definition": "Broad production class grouping (without sub-classes)",
+      "type": "class",
+      "source": "computed",
+      "notebook": "Merge_production_classes.ipynb",
+      "logic": "Maps production_class to a broader grouping: Independent Producer sub-classes → 'Independent Producer'; Wage Worker sub-classes → 'Wage & Salary Worker'; all others unchanged.",
+      "inputs": ["production_class"],
+      "code": "broad_map = {\n    'Large Proprietor':                        'Large Proprietor',\n    'Small Proprietor':                        'Small Proprietor',\n    'Independent Producer – Formal':           'Independent Producer',\n    'Independent Producer – Informal':         'Independent Producer',\n    'Independent Producer – Unknown Education': 'Independent Producer',\n    'Wage & Independent Producer':             'Wage & Independent Producer',\n    'Wage Worker – Manager':                   'Wage & Salary Worker',\n    'Wage Worker – Gig':                       'Wage & Salary Worker',\n    'Wage Worker – Standard':                  'Wage & Salary Worker',\n    'Wage Worker – Gig/Standard Mix':          'Wage & Salary Worker',\n    'Out of earned income population':         'Out of earned income population'\n}\n\nmerged['production_class_broad'] = (\n    merged['production_class'].map(broad_map)\n)"
     }
   ]
 }

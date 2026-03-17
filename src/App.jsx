@@ -1,4 +1,7 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
+import Prism from "prismjs";
+import "prismjs/components/prism-python";
+import "prismjs/themes/prism-tomorrow.css";
 import VARIABLES from "./data/variables.json";
 
 /* ─── CONSTANTS ─────────────────────────────────────────────────────────────── */
@@ -9,6 +12,7 @@ const TYPE_COLORS = {
   benefits:       { bg: "#FFF3E0", text: "#E65100", border: "#FFCC80" },
   demographics:   { bg: "#F3E5F5", text: "#6A1B9A", border: "#CE93D8" },
   "wage, capital": { bg: "#ECEFF1", text: "#37474F", border: "#B0BEC5" },
+  "class":          { bg: "#FFF9C4", text: "#F57F17", border: "#FFF176" },
 };
 
 const SOURCE_DESCRIPTIONS = {
@@ -17,6 +21,7 @@ const SOURCE_DESCRIPTIONS = {
   tbl_source:            "Tax file source",
   "firm data":           "Firm-level data",
   computed:              "Computed variable",
+  "national accounts":   "National accounts data",
 };
 
 /* ─── SMALL COMPONENTS ──────────────────────────────────────────────────────── */
@@ -58,15 +63,19 @@ function InputPill({ name, isClickable, onClick }) {
 
 function CodeBlock({ code }) {
   const [copied, setCopied] = useState(false);
+  const codeRef = useRef(null);
   const handleCopy = () => {
     navigator.clipboard.writeText(code);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   };
+  useEffect(() => {
+    if (codeRef.current) Prism.highlightElement(codeRef.current);
+  }, [code]);
   return (
     <div style={{ position: "relative", marginTop: "8px" }}>
       <button onClick={handleCopy} style={{
-        position: "absolute", top: "8px", right: "8px",
+        position: "absolute", top: "8px", right: "8px", zIndex: 1,
         background: copied ? "#4CAF50" : "rgba(255,255,255,0.1)",
         border: "1px solid rgba(255,255,255,0.2)", borderRadius: "4px",
         color: "#fff", fontSize: "11px", padding: "3px 8px", cursor: "pointer",
@@ -74,12 +83,12 @@ function CodeBlock({ code }) {
         {copied ? "Copied ✓" : "Copy"}
       </button>
       <pre style={{
-        background: "#1E1E2E", color: "#CDD6F4", padding: "16px 18px",
+        background: "#1E1E2E", padding: "16px 18px",
         borderRadius: "8px", fontSize: "12.5px", lineHeight: "1.65",
         fontFamily: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace",
         overflowX: "auto", margin: 0, border: "1px solid #313244",
       }}>
-        {code}
+        <code ref={codeRef} className="language-python">{code}</code>
       </pre>
     </div>
   );
@@ -193,10 +202,12 @@ function VariableDetail({ variable, allVarNames, onSelectVar }) {
         </div>
       )}
 
-      <div>
-        <label style={labelStyle}>Python Code</label>
-        <CodeBlock code={variable.code} />
-      </div>
+      {variable.code && variable.code.trim() !== "" && (
+        <div>
+          <label style={labelStyle}>Python Code</label>
+          <CodeBlock code={variable.code} />
+        </div>
+      )}
     </div>
   );
 }
@@ -266,16 +277,16 @@ export default function App() {
       <header style={{
         background: "linear-gradient(135deg, #1A1A2E 0%, #16213E 100%)",
         color: "#fff", padding: "16px 28px",
-        display: "flex", alignItems: "center", justifyContent: "space-between",
+        display: "flex", alignItems: "center",
         flexShrink: 0,
       }}>
         <div>
           <h1 style={{ margin: 0, fontSize: "18px", fontWeight: 700 }}>Variable Dictionary</h1>
           <p style={{ margin: "2px 0 0", fontSize: "12px", opacity: 0.6 }}>
-            CBS Income &amp; Wages Research
+            DIWA - Feature Extraction
           </p>
         </div>
-        <div style={{ display: "flex", gap: "6px" }}>
+        <div style={{ display: "flex", gap: "6px", flex: 1, justifyContent: "center" }}>
           {strategies.map((s) => (
             <button key={s} onClick={() => setActiveStrategy(s)} style={{
               padding: "7px 16px", borderRadius: "6px", border: "none",
