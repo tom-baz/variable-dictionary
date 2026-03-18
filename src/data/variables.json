@@ -639,6 +639,26 @@
       "logic": "Sum of labor_income_s4, property_income_s3, business_income_s2, selfowned_income_s2, profits_6_s4, and income_nonfilers_s4.",
       "inputs": ["labor_income_s4", "property_income_s3", "business_income_s2", "selfowned_income_s2", "profits_6_s4", "income_nonfilers_s4"],
       "code": "df['total_income_6_s4'] = df[[\n    'labor_income_s4',\n    'property_income_s3',\n    'business_income_s2',\n    'selfowned_income_s2',\n    'profits_6_s4',\n    'income_nonfilers_s4'\n]].sum(axis=1, min_count=1)\ndf['total_income_6_s4'] = (\n    df['total_income_6_s4'].fillna(0)\n)"
+    },
+    {
+      "name": "labor_premium",
+      "definition": "Workplace labor income premium — firm fixed effect from regressing log labor income on workplace, age category, gender, nationality, and education",
+      "type": "premium",
+      "source": "computed",
+      "notebook": "simple_analysis.txt",
+      "logic": "Population: ages 20–67 with positive labor income, at firms with ≥5 workers. Compute ln(labor_income_s4), define age categories (20–35, 36–50, 51–67), then run reghdfe ln_labor, absorb(labor_fe = firm_id, i.age_cat, i.male, i.jew, i.ba). The saved firm fixed effect is the labor premium, deduplicated at the firm level.",
+      "inputs": ["labor_income_s4", "firm_id", "age", "male", "jew", "ba"],
+      "code": "* Create log labor income (skip negatives/zeros)\ngen ln_labor = ln($labor_income) if $labor_income > 0\n\n* Filter to working age (20-67)\nkeep if $age >= 20 & $age <= 67\n\n* Create age categories\ngen age_cat = .\nreplace age_cat = 1 if $age >= 20 & $age <= 35\nreplace age_cat = 2 if $age >= 36 & $age <= 50\nreplace age_cat = 3 if $age >= 51 & $age <= 67\n\n* Keep only observations with valid labor income\nkeep if !missing(ln_labor)\n\n* Keep firms with >= 5 workers\nbys firm_id: gen firm_n_l = _N\nkeep if firm_n_l >= 5\n\n* Run regression with workplace fixed effects\nreghdfe ln_labor, absorb(labor_fe = $workplace_id i.age_cat i.$male i.$jew i.$ba)\n\n* Save workplace premiums (deduplicate at firm level)\nkeep $workplace_id labor_fe\nduplicates drop $workplace_id, force\nrename labor_fe labor_premium"
+    },
+    {
+      "name": "capital_premium",
+      "definition": "Workplace capital income premium — firm fixed effect from regressing log capital income on workplace, age category, gender, nationality, and education",
+      "type": "premium",
+      "source": "computed",
+      "notebook": "simple_analysis.txt",
+      "logic": "Population: ages 20–67 with positive capital income, at firms with ≥5 workers. Compute ln(capital_income_5_s4), define age categories (20–35, 36–50, 51–67), then run reghdfe ln_capital, absorb(capital_fe = firm_id, i.age_cat, i.male, i.jew, i.ba). The saved firm fixed effect is the capital premium, deduplicated at the firm level.",
+      "inputs": ["capital_income_5_s4", "firm_id", "age", "male", "jew", "ba"],
+      "code": "* Create log capital income (skip negatives/zeros)\ngen ln_capital = ln($capital_income) if $capital_income > 0\n\n* Filter to working age (20-67)\nkeep if $age >= 20 & $age <= 67\n\n* Create age categories\ngen age_cat = .\nreplace age_cat = 1 if $age >= 20 & $age <= 35\nreplace age_cat = 2 if $age >= 36 & $age <= 50\nreplace age_cat = 3 if $age >= 51 & $age <= 67\n\n* Keep only observations with valid capital income\nkeep if !missing(ln_capital)\n\n* Keep firms with >= 5 workers\nbys firm_id: gen firm_n_c = _N\nkeep if firm_n_c >= 5\n\n* Run regression with workplace fixed effects\nreghdfe ln_capital, absorb(capital_fe = $workplace_id i.age_cat i.$male i.$jew i.$ba)\n\n* Save workplace premiums (deduplicate at firm level)\nkeep $workplace_id capital_fe\nduplicates drop $workplace_id, force\nrename capital_fe capital_premium"
     }
   ],
   "Production Classes": [
@@ -791,6 +811,178 @@
       "logic": "Maps production_class to a broader grouping: Independent Producer sub-classes → 'Independent Producer'; Wage Worker sub-classes → 'Wage & Salary Worker'; all others unchanged.",
       "inputs": ["production_class"],
       "code": "broad_map = {\n    'Large Proprietor':                        'Large Proprietor',\n    'Small Proprietor':                        'Small Proprietor',\n    'Independent Producer – Formal':           'Independent Producer',\n    'Independent Producer – Informal':         'Independent Producer',\n    'Independent Producer – Unknown Education': 'Independent Producer',\n    'Wage & Independent Producer':             'Wage & Independent Producer',\n    'Wage Worker – Manager':                   'Wage & Salary Worker',\n    'Wage Worker – Gig':                       'Wage & Salary Worker',\n    'Wage Worker – Standard':                  'Wage & Salary Worker',\n    'Wage Worker – Gig/Standard Mix':          'Wage & Salary Worker',\n    'Out of earned income population':         'Out of earned income population'\n}\n\nmerged['production_class_broad'] = (\n    merged['production_class'].map(broad_map)\n)"
+    }
+  ],
+  "Social Groups": [
+    {
+      "name": "min",
+      "definition": "Gender indicator (1 = male, 0 = female)",
+      "type": "demographics",
+      "source": "tbl_x2022",
+      "notebook": "Tbl_x2022_compute_social_groups_var_fixed_CBS_safe.ipynb",
+      "logic": "Renamed from original 'min' to 'min_old', then copied back. Value 2 (female) replaced with 0.",
+      "inputs": ["min_old"],
+      "code": "Tbl_x2022.rename(columns={\"min\": \"min_old\"}, inplace=True)\n\nTbl_x2022['min'] = Tbl_x2022[\"min_old\"]\n\nTbl_x2022['min'] = Tbl_x2022['min'].replace({2: 0})"
+    },
+    {
+      "name": "jew",
+      "definition": "Nationality indicator (1 = Jews and others, 0 = Arabs)",
+      "type": "demographics",
+      "source": "tbl_x2022",
+      "notebook": "Tbl_x2022_compute_social_groups_var_fixed_CBS_safe.ipynb",
+      "logic": "Copied from KvutzaUchlusiya. Value 3 replaced with 1 (Jews and others), value 2 replaced with 0 (Arabs).",
+      "inputs": ["KvutzaUchlusiya"],
+      "code": "Tbl_x2022['jew'] = Tbl_x2022['KvutzaUchlusiya']\n\nTbl_x2022['jew'] = Tbl_x2022['jew'].replace({3: 1, 2: 0})"
+    },
+    {
+      "name": "gender_nationlity",
+      "definition": "Combined gender and nationality group (1 = male Jews, 2 = female Jews, 3 = male Arabs, 4 = female Arabs)",
+      "type": "demographics",
+      "source": "tbl_x2022",
+      "notebook": "Tbl_x2022_compute_social_groups_var_fixed_CBS_safe.ipynb",
+      "logic": "Computed via np.select: 1 = male Jews (min==1 & jew==1), 2 = female Jews (min==0 & jew==1), 3 = male Arabs (min==1 & jew==0), 4 = female Arabs (min==0 & jew==0). Default NaN.",
+      "inputs": ["min", "jew"],
+      "code": "conditions = [\n    (Tbl_x2022['min'] == 1) & (Tbl_x2022['jew'] == 1),\n    (Tbl_x2022['min'] == 0) & (Tbl_x2022['jew'] == 1),\n    (Tbl_x2022['min'] == 1) & (Tbl_x2022['jew'] == 0),\n    (Tbl_x2022['min'] == 0) & (Tbl_x2022['jew'] == 0)\n]\n\nvalues = [1, 2, 3, 4]\n\nTbl_x2022['gender_nationlity'] = np.select(conditions, values, default=np.NaN)"
+    },
+    {
+      "name": "generation",
+      "definition": "Immigration generation classification (1 = 1st gen, 2 = 2nd gen, 2.5 = 2.5 gen, 3 = 3rd gen, 4 = 4th gen)",
+      "type": "generation",
+      "source": "tbl_x2022",
+      "notebook": "Tbl_x2022_compute_social_groups_var_fixed_CBS_safe.ipynb",
+      "logic": "Computed via np.select with 5 conditions: (1) 1st gen — born outside Israel (EretzLeida in Africa/America/Asia/Europe/Oceania); (2) 2nd gen — born in Israel, both parents born outside Israel; (2.5) — born in Israel, one parent born in Israel, other born abroad; (3) 3rd gen — self and both parents born in Israel, at least one grandparent not born in Israel (all grandparent fields non-null); (4) 4th gen — self, parents, and all grandparents born in Israel. Default NaN (~16% missing, concentrated among Arabs).",
+      "inputs": ["EretzLeida", "EretzLeidaAv", "EretzLeidaEm", "EretzLeidaAvAV", "EretzLeidaAvEm", "EretzLeidaEmAV", "EretzLeidaEmEm"],
+      "code": "conditions = [\n    # First generation: born outside of Israel\n    (Tbl_x2022['EretzLeida'].isin(['Africa', 'America', 'Asia', 'Europe', 'Oceania'])),\n\n    # Second Generation: born in Israel, parents born outside Israel\n    ((Tbl_x2022['EretzLeida'] == 'Israel') &\n    (Tbl_x2022[['EretzLeidaAv', 'EretzLeidaEm']].isin(['Africa', 'America', 'Asia', 'Europe']).all(axis=1))),\n\n    # Generation 2.5: one parent born in Israel, other born outside\n    ((Tbl_x2022['EretzLeida'] == 'Israel') &\n    (((Tbl_x2022['EretzLeidaAv'] == 'Israel') & (Tbl_x2022['EretzLeidaEm'].isin(['Africa', 'America', 'Asia', 'Europe']))) |\n    ((Tbl_x2022['EretzLeidaEm'] == 'Israel') & (Tbl_x2022['EretzLeidaAv'].isin(['Africa', 'America', 'Asia', 'Europe']))))),\n\n    # Third generation: both parents born in Israel, not all grandparents\n    ((Tbl_x2022['EretzLeida'] == 'Israel') &\n    (Tbl_x2022[['EretzLeidaAv', 'EretzLeidaEm']].isin(['Israel']).all(axis=1)) &\n    (Tbl_x2022[['EretzLeidaAvAV', 'EretzLeidaAvEm', 'EretzLeidaEmAV', 'EretzLeidaEmEm']].notna().all(axis=1)) &\n    ((~Tbl_x2022[['EretzLeidaAvAV', 'EretzLeidaAvEm', 'EretzLeidaEmAV', 'EretzLeidaEmEm']].isin(['Israel']).all(axis=1)))),\n\n    # Fourth generation: all born in Israel\n    ((Tbl_x2022['EretzLeida'] == 'Israel') &\n    ((Tbl_x2022[['EretzLeidaAv', 'EretzLeidaEm', 'EretzLeidaAvAV', 'EretzLeidaEmAV', 'EretzLeidaAvEm', 'EretzLeidaEmEm']].isin(['Israel']).all(axis=1))))\n]\n\nvalues = [1, 2, 2.5, 3, 4]\n\nTbl_x2022['generation'] = np.select(conditions, values, default=np.nan)"
+    },
+    {
+      "name": "firstgmiz",
+      "definition": "1st generation Mizrahi (1 if born in Africa/Asia, else 0)",
+      "type": "ethnicity",
+      "source": "tbl_x2022",
+      "notebook": "Tbl_x2022_compute_social_groups_var_fixed_CBS_safe.ipynb",
+      "logic": "1 if generation==1 and EretzLeida in [Africa, Asia], else 0.",
+      "inputs": ["generation", "EretzLeida"],
+      "code": "Tbl_x2022['firstgmiz'] = (\n    (Tbl_x2022['generation'] == 1) &\n    (Tbl_x2022['EretzLeida'].isin(['Africa', 'Asia']))\n).astype(int)"
+    },
+    {
+      "name": "firstgash",
+      "definition": "1st generation Ashkenazi (1 if born in America/Europe/Oceania, else 0)",
+      "type": "ethnicity",
+      "source": "tbl_x2022",
+      "notebook": "Tbl_x2022_compute_social_groups_var_fixed_CBS_safe.ipynb",
+      "logic": "1 if generation==1 and EretzLeida in [America, Europe, Oceania], else 0.",
+      "inputs": ["generation", "EretzLeida"],
+      "code": "Tbl_x2022['firstgash'] = (\n    (Tbl_x2022['generation'] == 1) &\n    (Tbl_x2022['EretzLeida'].isin(['America', 'Europe', 'Oceania']))\n).astype(int)"
+    },
+    {
+      "name": "secondgmiz",
+      "definition": "2nd generation Mizrahi (1 if both parents born in Africa/Asia, else 0)",
+      "type": "ethnicity",
+      "source": "tbl_x2022",
+      "notebook": "Tbl_x2022_compute_social_groups_var_fixed_CBS_safe.ipynb",
+      "logic": "1 if generation==2 and both parents born in Africa/Asia, else 0.",
+      "inputs": ["generation", "EretzLeidaAv", "EretzLeidaEm"],
+      "code": "second_generation = (Tbl_x2022['generation'] == 2)\nmizrahi_father = (Tbl_x2022['EretzLeidaAv'].isin(['Africa', 'Asia']))\nmizrahi_mother = (Tbl_x2022['EretzLeidaEm'].isin(['Africa', 'Asia']))\n\nTbl_x2022['secondgmiz'] = (\n    second_generation &\n    mizrahi_father &\n    mizrahi_mother\n).astype(int)"
+    },
+    {
+      "name": "secondgash",
+      "definition": "2nd generation Ashkenazi (1 if both parents born in America/Europe, else 0)",
+      "type": "ethnicity",
+      "source": "tbl_x2022",
+      "notebook": "Tbl_x2022_compute_social_groups_var_fixed_CBS_safe.ipynb",
+      "logic": "1 if generation==2 and both parents born in America/Europe, else 0.",
+      "inputs": ["generation", "EretzLeidaAv", "EretzLeidaEm"],
+      "code": "ahkenazi_father = (Tbl_x2022['EretzLeidaAv'].isin(['America', 'Europe']))\nahkenazi_mother = (Tbl_x2022['EretzLeidaEm'].isin(['America', 'Europe']))\n\nTbl_x2022['secondgash'] = (\n    second_generation &\n    ahkenazi_father &\n    ahkenazi_mother\n).astype(int)"
+    },
+    {
+      "name": "secondgmix",
+      "definition": "2nd generation mixed ethnicity (1 if one parent Mizrahi and other Ashkenazi, else 0)",
+      "type": "ethnicity",
+      "source": "tbl_x2022",
+      "notebook": "Tbl_x2022_compute_social_groups_var_fixed_CBS_safe.ipynb",
+      "logic": "1 if generation==2 and one parent from Africa/Asia and the other from America/Europe, else 0.",
+      "inputs": ["generation", "EretzLeidaAv", "EretzLeidaEm"],
+      "code": "ahkenazi_father_mizrahi_mother = (\n    (Tbl_x2022['EretzLeidaAv'].isin(['America', 'Europe'])) &\n    (Tbl_x2022['EretzLeidaEm'].isin(['Africa', 'Asia']))\n)\n\nmizrahi_father_ahkenazi_mother = (\n    (Tbl_x2022['EretzLeidaAv'].isin(['Africa', 'Asia'])) &\n    (Tbl_x2022['EretzLeidaEm'].isin(['America', 'Europe']))\n)\n\nTbl_x2022['secondgmix'] = (\n    second_generation &\n    (ahkenazi_father_mizrahi_mother | mizrahi_father_ahkenazi_mother)\n).astype(int)"
+    },
+    {
+      "name": "secondhgmiz",
+      "definition": "2.5 generation Mizrahi (1 if foreign-born parent is Mizrahi and Israeli-born parent's parents are also Mizrahi or Israeli-born, NaN otherwise)",
+      "type": "ethnicity",
+      "source": "tbl_x2022",
+      "notebook": "Tbl_x2022_compute_social_groups_var_fixed_CBS_safe.ipynb",
+      "logic": "1 if generation==2.5 and the foreign-born parent is from Africa/Asia, and the Israeli-born parent's parents are also Mizrahi or Israeli-born. NaN otherwise.",
+      "inputs": ["generation", "EretzLeidaAv", "EretzLeidaEm", "EretzLeidaAvAV", "EretzLeidaAvEm", "EretzLeidaEmAV", "EretzLeidaEmEm"],
+      "code": "second_and_a_half_generation = (Tbl_x2022['generation'] == 2.5)\n\nmizrahi_father = (Tbl_x2022['EretzLeidaAv'].isin(['Africa', 'Asia']))\nisraeli_born_mother = (Tbl_x2022['EretzLeidaEm'] == 'Israel')\nmother_side_at_least_one_grandparent_israli_born = (\n    Tbl_x2022[['EretzLeidaAvEm', 'EretzLeidaEmEm']].isin(['Israel']).any(axis=1)\n)\nmother_side_all_grandparents_mizrahi = (\n    Tbl_x2022[['EretzLeidaAvEm', 'EretzLeidaEmEm']].isin(['Africa', 'Asia']).all(axis=1)\n)\n\nmizrahi_mother = (Tbl_x2022['EretzLeidaEm'].isin(['Africa', 'Asia']))\nisraeli_born_father = (Tbl_x2022['EretzLeidaAv'] == 'Israel')\nfather_side_at_least_one_grandparent_israli_born = (\n    Tbl_x2022[['EretzLeidaAvAV', 'EretzLeidaEmAV']].isin(['Israel']).any(axis=1)\n)\nfather_side_all_grandparents_mizrahi = (\n    Tbl_x2022[['EretzLeidaAvAV', 'EretzLeidaEmAV']].isin(['Africa', 'Asia']).all(axis=1)\n)\n\nmizrahi_father_israeli_born_mother = (mizrahi_father & israeli_born_mother)\nmother_side_ok = (mother_side_all_grandparents_mizrahi | mother_side_at_least_one_grandparent_israli_born)\n\nmizrahi_mother_israeli_born_father = (mizrahi_mother & israeli_born_father)\nfather_side_ok = (father_side_all_grandparents_mizrahi | father_side_at_least_one_grandparent_israli_born)\n\nconditions_mizrahi = (\n    second_and_a_half_generation &\n    (\n        (mizrahi_father_israeli_born_mother & mother_side_ok) |\n        (mizrahi_mother_israeli_born_father & father_side_ok)\n    )\n)\n\nTbl_x2022['secondhgmiz'] = np.where(conditions_mizrahi, 1, np.nan)"
+    },
+    {
+      "name": "secondhgash",
+      "definition": "2.5 generation Ashkenazi (1 if foreign-born parent is Ashkenazi and Israeli-born parent's parents are also Ashkenazi or Israeli-born, NaN otherwise)",
+      "type": "ethnicity",
+      "source": "tbl_x2022",
+      "notebook": "Tbl_x2022_compute_social_groups_var_fixed_CBS_safe.ipynb",
+      "logic": "1 if generation==2.5 and the foreign-born parent is from Europe/America, and the Israeli-born parent's parents are also Ashkenazi or Israeli-born. NaN otherwise.",
+      "inputs": ["generation", "EretzLeidaAv", "EretzLeidaEm", "EretzLeidaAvAV", "EretzLeidaAvEm", "EretzLeidaEmAV", "EretzLeidaEmEm"],
+      "code": "ashkenazi_father = (Tbl_x2022['EretzLeidaAv'].isin(['Europe', 'America']))\nisraeli_born_mother = (Tbl_x2022['EretzLeidaEm'] == 'Israel')\nmother_side_all_grandparents_ashkenazi = (\n    Tbl_x2022[['EretzLeidaAvEm', 'EretzLeidaEmEm']].isin(['Europe', 'America']).all(axis=1)\n)\nmother_side_at_least_one_grandparent_israli_born = (\n    Tbl_x2022[['EretzLeidaAvEm', 'EretzLeidaEmEm']].isin(['Israel']).any(axis=1)\n)\n\nashkenazi_mother = (Tbl_x2022['EretzLeidaEm'].isin(['Africa', 'Asia']))\nisraeli_born_father = (Tbl_x2022['EretzLeidaAv'] == 'Israel')\nfather_side_all_grandparents_ashkenazi = (\n    Tbl_x2022[['EretzLeidaAvAV', 'EretzLeidaEmAV']].isin(['Europe', 'America']).all(axis=1)\n)\nfather_side_at_least_one_grandparent_israli_born = (\n    Tbl_x2022[['EretzLeidaAvAV', 'EretzLeidaEmAV']].isin(['Israel']).any(axis=1)\n)\n\nconditions_ashkenazi = (\n    second_and_a_half_generation &\n    (\n        (ashkenazi_father & israeli_born_mother &\n         (mother_side_all_grandparents_ashkenazi | mother_side_at_least_one_grandparent_israli_born)) |\n        (ashkenazi_mother & israeli_born_father &\n         (father_side_all_grandparents_ashkenazi | father_side_at_least_one_grandparent_israli_born))\n    )\n)\n\nTbl_x2022['secondhgash'] = np.where(conditions_ashkenazi, 1, np.nan)"
+    },
+    {
+      "name": "secondghmix",
+      "definition": "2.5 generation mixed ethnicity (1 if foreign-born parent is Mizrahi with Ashkenazi grandparent(s) on other side, or vice versa, else 0)",
+      "type": "ethnicity",
+      "source": "tbl_x2022",
+      "notebook": "Tbl_x2022_compute_social_groups_var_fixed_CBS_safe.ipynb",
+      "logic": "1 if generation==2.5 and the foreign-born parent is Mizrahi with Ashkenazi grandparent(s) on the other side, or vice versa. 0 otherwise.",
+      "inputs": ["generation", "EretzLeidaAv", "EretzLeidaEm", "EretzLeidaAvAV", "EretzLeidaAvEm", "EretzLeidaEmAV", "EretzLeidaEmEm"],
+      "code": "mother_side_at_least_one_grandparent_ashkenazi = (\n    Tbl_x2022[['EretzLeidaAvEm', 'EretzLeidaEmEm']].isin(['Europe', 'America']).any(axis=1)\n)\nfather_side_at_least_one_grandparent_ashkenazi = (\n    Tbl_x2022[['EretzLeidaAvAV', 'EretzLeidaEmAV']].isin(['Europe', 'America']).any(axis=1)\n)\nmother_side_at_least_one_grandparent_mizrahi = (\n    Tbl_x2022[['EretzLeidaAvEm', 'EretzLeidaEmEm']].isin(['Africa', 'Asia']).any(axis=1)\n)\nfather_side_at_least_one_grandparent_mizrahi = (\n    Tbl_x2022[['EretzLeidaAvAV', 'EretzLeidaEmAV']].isin(['Africa', 'Asia']).any(axis=1)\n)\n\n# Parent Mizrahi, other parent Israeli-born with Ashkenazi grandparent\ncond1 = (\n    second_and_a_half_generation &\n    (\n        (mizrahi_father_israeli_born_mother & mother_side_at_least_one_grandparent_ashkenazi) |\n        (mizrahi_mother_israeli_born_father & father_side_at_least_one_grandparent_ashkenazi)\n    )\n)\n\n# Parent Ashkenazi, other parent Israeli-born with Mizrahi grandparent\ncond2 = (\n    second_and_a_half_generation &\n    (\n        (ashkenazi_father_israeli_born_mother & mother_side_at_least_one_grandparent_mizrahi) |\n        (ashkenazi_mother_israeli_born_father & father_side_at_least_one_grandparent_mizrahi)\n    )\n)\n\nTbl_x2022['secondghmix'] = np.where(cond1 | cond2, 1, 0)"
+    },
+    {
+      "name": "thirdgmiz",
+      "definition": "3rd generation Mizrahi (1 if at least one grandparent from Africa/Asia and none from America/Europe, else 0)",
+      "type": "ethnicity",
+      "source": "tbl_x2022",
+      "notebook": "Tbl_x2022_compute_social_groups_var_fixed_CBS_safe.ipynb",
+      "logic": "1 if generation==3 and at least one grandparent from Africa/Asia and no grandparent from America/Europe. 0 otherwise.",
+      "inputs": ["generation", "EretzLeidaAvAV", "EretzLeidaAvEm", "EretzLeidaEmAV", "EretzLeidaEmEm"],
+      "code": "Tbl_x2022['thirdgmiz'] = np.where(\n    (Tbl_x2022['generation'] == 3) &\n    (\n        Tbl_x2022['EretzLeidaAvAV'].isin(['Africa', 'Asia']) |\n        Tbl_x2022['EretzLeidaAvEm'].isin(['Africa', 'Asia']) |\n        Tbl_x2022['EretzLeidaEmAV'].isin(['Africa', 'Asia']) |\n        Tbl_x2022['EretzLeidaEmEm'].isin(['Africa', 'Asia'])\n    ) &\n    ~(\n        Tbl_x2022['EretzLeidaAvAV'].isin(['America', 'Europe']) |\n        Tbl_x2022['EretzLeidaAvEm'].isin(['America', 'Europe']) |\n        Tbl_x2022['EretzLeidaEmAV'].isin(['America', 'Europe']) |\n        Tbl_x2022['EretzLeidaEmEm'].isin(['America', 'Europe'])\n    ),\n    1, 0\n)"
+    },
+    {
+      "name": "thirdgash",
+      "definition": "3rd generation Ashkenazi (1 if at least one grandparent from America/Europe and none from Africa/Asia, else 0)",
+      "type": "ethnicity",
+      "source": "tbl_x2022",
+      "notebook": "Tbl_x2022_compute_social_groups_var_fixed_CBS_safe.ipynb",
+      "logic": "1 if generation==3 and at least one grandparent from America/Europe and no grandparent from Africa/Asia. 0 otherwise.",
+      "inputs": ["generation", "EretzLeidaAvAV", "EretzLeidaAvEm", "EretzLeidaEmAV", "EretzLeidaEmEm"],
+      "code": "Tbl_x2022['thirdgash'] = np.where(\n    (Tbl_x2022['generation'] == 3) &\n    (\n        Tbl_x2022['EretzLeidaAvAV'].isin(['America', 'Europe']) |\n        Tbl_x2022['EretzLeidaAvEm'].isin(['America', 'Europe']) |\n        Tbl_x2022['EretzLeidaEmAV'].isin(['America', 'Europe']) |\n        Tbl_x2022['EretzLeidaEmEm'].isin(['America', 'Europe'])\n    ) &\n    ~(\n        Tbl_x2022['EretzLeidaAvAV'].isin(['Africa', 'Asia']) |\n        Tbl_x2022['EretzLeidaAvEm'].isin(['Africa', 'Asia']) |\n        Tbl_x2022['EretzLeidaEmAV'].isin(['Africa', 'Asia']) |\n        Tbl_x2022['EretzLeidaEmEm'].isin(['Africa', 'Asia'])\n    ),\n    1, 0\n)"
+    },
+    {
+      "name": "thirdgmix",
+      "definition": "3rd generation mixed ethnicity (residual group: 3rd gen individuals who are neither purely Mizrahi nor purely Ashkenazi)",
+      "type": "ethnicity",
+      "source": "tbl_x2022",
+      "notebook": "Tbl_x2022_compute_social_groups_var_fixed_CBS_safe.ipynb",
+      "logic": "Set to 1 for all 3rd generation, then set to 0 where thirdgmiz==1 or thirdgash==1 (i.e., the residual mixed group). NaN for non-3rd-gen.",
+      "inputs": ["generation", "thirdgmiz", "thirdgash"],
+      "code": "# Initialize thirdgmix to NaN\nTbl_x2022['thirdgmix'] = np.nan\n\n# Set thirdgmix to 1 for all third generation individuals\nTbl_x2022.loc[Tbl_x2022['generation'] == 3, 'thirdgmix'] = 1\n\n# Set thirdgmix to 0 for individuals identified as Mizrahi\nTbl_x2022.loc[Tbl_x2022['thirdgmiz'] == 1, 'thirdgmix'] = 0\n\n# Set thirdgmix to 0 for individuals identified as Ashkenazi\nTbl_x2022.loc[Tbl_x2022['thirdgash'] == 1, 'thirdgmix'] = 0"
+    },
+    {
+      "name": "ety",
+      "definition": "Detailed ethno-generational classification (13 categories: 0=Arab, 1=1st gen Mizrahi, 2=1st gen Ashkenazi, 3=2nd gen Mizrahi, 4=2.5 gen Mizrahi, 5=2nd gen Ashkenazi, 6=2.5 gen Ashkenazi, 7=2nd gen mixed, 8=2.5 gen mixed, 9=3rd gen Mizrahi, 10=3rd gen Ashkenazi, 11=3rd gen mixed, 12=4th generation)",
+      "type": "ethnicity",
+      "source": "tbl_x2022",
+      "notebook": "Tbl_x2022_compute_social_groups_var_fixed_CBS_safe.ipynb",
+      "logic": "Composite variable via np.select: 0=Arab, 1=1st gen Mizrahi, 2=1st gen Ashkenazi, 3=2nd gen Mizrahi, 4=2.5 gen Mizrahi, 5=2nd gen Ashkenazi, 6=2.5 gen Ashkenazi, 7=2nd gen mixed, 8=2.5 gen mixed, 9=3rd gen Mizrahi, 10=3rd gen Ashkenazi, 11=3rd gen mixed, 12=4th generation. Default NaN (~9% missing among Jews).",
+      "inputs": ["jew", "generation", "firstgmiz", "firstgash", "secondgmiz", "secondhgmiz", "secondgash", "secondhgash", "secondgmix", "secondghmix", "thirdgmiz", "thirdgash", "thirdgmix"],
+      "code": "Tbl_x2022['ety'] = np.nan\n\nconditions_ety = [\n    Tbl_x2022['jew'] == 0,\n    (Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 1) & (Tbl_x2022['firstgmiz'] == 1),\n    (Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 1) & (Tbl_x2022['firstgash'] == 1),\n    (Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 2) & (Tbl_x2022['secondgmiz'] == 1),\n    (Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 2.5) & (Tbl_x2022['secondhgmiz'] == 1),\n    (Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 2) & (Tbl_x2022['secondgash'] == 1),\n    (Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 2.5) & (Tbl_x2022['secondhgash'] == 1),\n    (Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 2) & (Tbl_x2022['secondgmix'] == 1),\n    (Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 2.5) & (Tbl_x2022['secondghmix'] == 1),\n    (Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 3) & (Tbl_x2022['thirdgmiz'] == 1),\n    (Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 3) & (Tbl_x2022['thirdgash'] == 1),\n    (Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 3) & (Tbl_x2022['thirdgmix'] == 1),\n    (Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 4)\n]\nvalues_ety = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]\n\nTbl_x2022['ety'] = np.select(conditions_ety, values_ety, default=np.nan)"
+    },
+    {
+      "name": "et",
+      "definition": "Condensed ethno-generational classification (10 categories: 0=Arab, 1=1st gen Mizrahi, 2=1st gen Ashkenazi, 3=2nd/2.5 gen Mizrahi, 4=2nd/2.5 gen Ashkenazi, 5=2nd/2.5 gen mixed, 6=3rd gen Mizrahi, 7=3rd gen Ashkenazi, 8=3rd gen mixed, 9=4th generation)",
+      "type": "ethnicity",
+      "source": "tbl_x2022",
+      "notebook": "Tbl_x2022_compute_social_groups_var_fixed_CBS_safe.ipynb",
+      "logic": "Like ety but merges 2nd and 2.5 generations: 0=Arab, 1=1st gen Mizrahi, 2=1st gen Ashkenazi, 3=2nd/2.5 gen Mizrahi, 4=2nd/2.5 gen Ashkenazi, 5=2nd/2.5 gen mixed, 6=3rd gen Mizrahi, 7=3rd gen Ashkenazi, 8=3rd gen mixed, 9=4th generation. Default NaN.",
+      "inputs": ["jew", "generation", "firstgmiz", "firstgash", "secondgmiz", "secondhgmiz", "secondgash", "secondhgash", "secondgmix", "secondghmix", "thirdgmiz", "thirdgash", "thirdgmix"],
+      "code": "Tbl_x2022['et'] = np.nan\n\nconditions_et = [\n    Tbl_x2022['jew'] == 0,\n    (Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 1) & (Tbl_x2022['firstgmiz'] == 1),\n    (Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 1) & (Tbl_x2022['firstgash'] == 1),\n    ((Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 2) & (Tbl_x2022['secondgmiz'] == 1)) |\n    ((Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 2.5) & (Tbl_x2022['secondhgmiz'] == 1)),\n    ((Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 2) & (Tbl_x2022['secondgash'] == 1)) |\n    ((Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 2.5) & (Tbl_x2022['secondhgash'] == 1)),\n    ((Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 2) & (Tbl_x2022['secondgmix'] == 1)) |\n    ((Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 2.5) & (Tbl_x2022['secondghmix'] == 1)),\n    (Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 3) & (Tbl_x2022['thirdgmiz'] == 1),\n    (Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 3) & (Tbl_x2022['thirdgash'] == 1),\n    (Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 3) & (Tbl_x2022['thirdgmix'] == 1),\n    (Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 4)\n]\nvalues_et = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]\n\nTbl_x2022['et'] = np.select(conditions_et, values_et, default=np.nan)"
     }
   ]
 }

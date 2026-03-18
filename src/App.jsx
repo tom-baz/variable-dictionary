@@ -3,6 +3,7 @@ import Prism from "prismjs";
 import "prismjs/components/prism-python";
 import "prismjs/themes/prism-tomorrow.css";
 import VARIABLES from "./data/variables.json";
+import labLogo from "./lab-logo.png";
 
 /* ─── CONSTANTS ─────────────────────────────────────────────────────────────── */
 
@@ -13,6 +14,9 @@ const TYPE_COLORS = {
   demographics:   { bg: "#F3E5F5", text: "#6A1B9A", border: "#CE93D8" },
   "wage, capital": { bg: "#ECEFF1", text: "#37474F", border: "#B0BEC5" },
   "class":          { bg: "#FFF9C4", text: "#F57F17", border: "#FFF176" },
+  generation:       { bg: "#E0F2F1", text: "#00695C", border: "#80CBC4" },
+  ethnicity:        { bg: "#FCE4EC", text: "#AD1457", border: "#F48FB1" },
+  premium:          { bg: "#E8EAF6", text: "#283593", border: "#9FA8DA" },
 };
 
 const SOURCE_DESCRIPTIONS = {
@@ -22,6 +26,7 @@ const SOURCE_DESCRIPTIONS = {
   "firm data":           "Firm-level data",
   computed:              "Computed variable",
   "national accounts":   "National accounts data",
+  tbl_x2022:             "Population registry cross-section 2022",
 };
 
 /* ─── SMALL COMPONENTS ──────────────────────────────────────────────────────── */
@@ -106,12 +111,12 @@ function VariableDetail({ variable, allVarNames, onSelectVar }) {
     return (
       <div style={{
         display: "flex", alignItems: "center", justifyContent: "center",
-        height: "100%", color: "#9E9E9E", fontSize: "14px", fontStyle: "italic",
+        height: "100%", color: "#9E9E9E", fontSize: "18px", fontStyle: "italic",
         padding: "40px", textAlign: "center",
       }}>
         <div>
-          <div style={{ fontSize: "40px", marginBottom: "12px", opacity: 0.3 }}>📋</div>
-          Select a variable from the list to view its details
+          <img src={labLogo} alt="Income Inequality Lab" style={{ width: "280px", marginBottom: "16px", opacity: 0.7 }} />
+          <div>Select a variable from the list to view its details</div>
         </div>
       </div>
     );
