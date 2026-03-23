@@ -17,6 +17,8 @@ const TYPE_COLORS = {
   generation:       { bg: "#E0F2F1", text: "#00695C", border: "#80CBC4" },
   ethnicity:        { bg: "#FCE4EC", text: "#AD1457", border: "#F48FB1" },
   premium:          { bg: "#E8EAF6", text: "#283593", border: "#9FA8DA" },
+  education:        { bg: "#E0F7FA", text: "#00838F", border: "#80DEEA" },
+  geography:        { bg: "#FBE9E7", text: "#BF360C", border: "#FFAB91" },
 };
 
 const SOURCE_DESCRIPTIONS = {
@@ -27,6 +29,8 @@ const SOURCE_DESCRIPTIONS = {
   computed:              "Computed variable",
   "national accounts":   "National accounts data",
   tbl_x2022:             "Population registry cross-section 2022",
+  tbl_mh2021:            "Population census 2021",
+  tbl_yishuvomoeza95_2022: "Locality and regional council registry",
 };
 
 /* ─── SMALL COMPONENTS ──────────────────────────────────────────────────────── */
@@ -251,6 +255,8 @@ export default function App() {
     });
   }, [vars, searchQuery, filterType]);
 
+  const navigatingToVar = useRef(false);
+
   const handleSelectVar = (varName) => {
     let v = vars.find((x) => x.name === varName);
     if (v) { setSelectedVar(v); return; }
@@ -258,6 +264,7 @@ export default function App() {
       if (strat === activeStrategy) continue;
       v = (VARIABLES[strat] || []).find((x) => x.name === varName);
       if (v) {
+        navigatingToVar.current = true;
         setActiveStrategy(strat);
         setSelectedVar(v);
         setSearchQuery("");
@@ -268,6 +275,10 @@ export default function App() {
   };
 
   useEffect(() => {
+    if (navigatingToVar.current) {
+      navigatingToVar.current = false;
+      return;
+    }
     setSelectedVar(null);
     setSearchQuery("");
     setFilterType("all");

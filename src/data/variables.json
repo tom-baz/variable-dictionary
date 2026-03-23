@@ -7,7 +7,9 @@
       "source": "tbl_hahnsotpratt87_21",
       "notebook": "compute_income_variables.ipynb",
       "logic": "Renamed from HahnasaSahar. Missing values replaced with 0.",
-      "inputs": ["HahnasaSahar"],
+      "inputs": [
+        "HahnasaSahar"
+      ],
       "code": "# Rename CBS variable\ntbl_hahnsotpratt87_21.rename(\n    columns={'HahnasaSahar': 'wages_s2'},\n    inplace=True\n)\n\n# Convert missing values to 0\ntbl_hahnsotpratt87_21['wages_s2'] = (\n    tbl_hahnsotpratt87_21['wages_s2'].fillna(0)\n)"
     },
     {
@@ -17,7 +19,9 @@
       "source": "tbl_hahnsotpratt87_21",
       "notebook": "compute_income_variables.ipynb",
       "logic": "Renamed from Hahnasa_iskit. Missing values replaced with 0.",
-      "inputs": ["Hahnasa_iskit"],
+      "inputs": [
+        "Hahnasa_iskit"
+      ],
       "code": "# Rename CBS variable\ntbl_hahnsotpratt87_21.rename(\n    columns={'Hahnasa_iskit': 'business_income_s2'},\n    inplace=True\n)\n\n# Convert missing values to 0\ntbl_hahnsotpratt87_21['business_income_s2'] = (\n    tbl_hahnsotpratt87_21['business_income_s2'].fillna(0)\n)"
     },
     {
@@ -27,7 +31,9 @@
       "source": "tbl_hahnsotpratt87_21",
       "notebook": "compute_income_variables.ipynb",
       "logic": "Renamed from Hahnasa_honit. Missing values replaced with 0.",
-      "inputs": ["Hahnasa_honit"],
+      "inputs": [
+        "Hahnasa_honit"
+      ],
       "code": "# Rename CBS variable\ntbl_hahnsotpratt87_21.rename(\n    columns={'Hahnasa_honit': 'capital_gains_s2'},\n    inplace=True\n)\n\n# Convert missing values to 0\ntbl_hahnsotpratt87_21['capital_gains_s2'] = (\n    tbl_hahnsotpratt87_21['capital_gains_s2'].fillna(0)\n)"
     },
     {
@@ -37,7 +43,9 @@
       "source": "tbl_hahnsotpratt87_21",
       "notebook": "compute_income_variables.ipynb",
       "logic": "Renamed from Hahnasa_honit_aheret. Missing values replaced with 0.",
-      "inputs": ["Hahnasa_honit_aheret"],
+      "inputs": [
+        "Hahnasa_honit_aheret"
+      ],
       "code": "tbl_hahnsotpratt87_21.rename(\n    columns={'Hahnasa_honit_aheret': 'dividends_s2'},\n    inplace=True\n)\ntbl_hahnsotpratt87_21['dividends_s2'] = (\n    tbl_hahnsotpratt87_21['dividends_s2'].fillna(0)\n)"
     },
     {
@@ -47,8 +55,10 @@
       "source": "tbl_hahnsotpratt87_21",
       "notebook": "compute_income_variables.ipynb",
       "logic": "Renamed from hahnasa_aheret. Missing values replaced with 0.",
-      "inputs": ["hahnasa_aheret"],
-      "code": "tbl_hahnsotpratt87_21.rename(\n    columns={'hahnasa_aheret': 'other_wage_s2'},\n    inplace=True\n)"
+      "inputs": [
+        "hahnasa_aheret"
+      ],
+      "code": "tbl_hahnsotpratt87_21.rename(\n    columns={'hahnasa_aheret': 'other_wage_s2'},\n    inplace=True\n)\ntbl_hahnsotpratt87_21['other_wage_s2'] = (\n    tbl_hahnsotpratt87_21['other_wage_s2'].fillna(0)\n)"
     },
     {
       "name": "selfowned_income_s2",
@@ -56,9 +66,11 @@
       "type": "capital",
       "source": "tbl_source",
       "notebook": "compute_income_variables.ipynb",
-      "logic": "RevahGolmi for individuals whose SugTikShatMas (tax file type) is one of: 10, 20, 40, 41, 42, 43, 52, 53, 91, 96, 98. These codes identify self-employed business owners filing specific tax form types.",
-      "inputs": ["RevahGolmi", "SugTikShatMas"],
-      "code": "# selfowned_income_s2 = RevahGolmi\n# where SugTikShatMas in [10, 20, 40, 41, 42, 43, 52, 53, 91, 96, 98]"
+      "logic": "Renamed from RevahGolmi in tbl_source. Merged into the main DataFrame on individual ID and tax year. Missing values replaced with 0.",
+      "inputs": [
+        "RevahGolmi"
+      ],
+      "code": "tbl_source.rename(\n    columns={'RevahGolmi': 'selfowned_income_s2'},\n    inplace=True\n)\n\n# Merge into main DataFrame\nmerged_df = pd.merge(\n    tbl_hahnsotpratt87_21,\n    tbl_source[['MisparTeudatZehut_fic', 'shana',\n                'selfowned_income_s2']],\n    on=['MisparTeudatZehut_fic', 'shana'], how='left'\n)\nmerged_df['selfowned_income_s2'] = (\n    merged_df['selfowned_income_s2'].fillna(0)\n)"
     },
     {
       "name": "property_income_s2",
@@ -66,19 +78,31 @@
       "type": "capital",
       "source": "tbl_hahnsotpratt87_21",
       "notebook": "compute_income_variables.ipynb",
-      "logic": "Sum of HahnasaHonitAheret (other capital income including dividends) and HahnasaLeLoYilshit (tax-exempt income, primarily rent and interest).",
-      "inputs": ["HahnasaHonitAheret", "HahnasaLeLoYilshit"],
-      "code": "# property_income_s2 = HahnasaHonitAheret + HahnasaLeLoYilshit"
+      "logic": "Sum of dividends_s2 (renamed from Hahnasa_honit_aheret) and Hahnasa_lelo_yishit (tax-exempt income, primarily rent and interest).",
+      "inputs": [
+        "dividends_s2",
+        "Hahnasa_lelo_yishit"
+      ],
+      "code": "tbl_hahnsotpratt87_21['property_income_s2'] = (\n    tbl_hahnsotpratt87_21[['dividends_s2', 'Hahnasa_lelo_yishit']]\n    .sum(axis=1, min_count=1)\n)"
     },
     {
       "name": "tax_report",
       "definition": "Binary variable: whether individual filed a tax report (form 1301) versus being reported only in employer form 106",
       "type": "demographics",
-      "source": "tbl_hahnsotpratt87_21",
+      "source": "tbl_hahnsotpratt87_21, tbl_source",
       "notebook": "compute_income_variables.ipynb",
-      "logic": "Set to 1 if any of the following 8 variables is greater than 0: Hahnasa_Aheret, HahnasaHonit, HahnasaHonitAheret, HahnasaIskit, HahnasaLeLoYilshit, HahnasaNehe, HachnasaPtura, RevahGolmi. Set to 0 otherwise. Distinguishes tax filers from wage-only individuals.",
-      "inputs": ["Hahnasa_Aheret", "HahnasaHonit", "HahnasaHonitAheret", "HahnasaIskit", "HahnasaLeLoYilshit", "HahnasaNehe", "HachnasaPtura", "RevahGolmi"],
-      "code": "# Binary indicator for tax filing"
+      "logic": "Set to 1 if any of the following 8 variables is non-zero and non-missing: business_income_s2, other_wage_s2, capital_gains_s2, dividends_s2, Hahnasa_lelo_yishit, Hahnasat_nehe, Hahnasat_ptura, selfowned_income_s2. Excludes wages_s2 (wage-only earners are not considered tax filers). Set to 0 otherwise.",
+      "inputs": [
+        "business_income_s2",
+        "other_wage_s2",
+        "capital_gains_s2",
+        "dividends_s2",
+        "Hahnasa_lelo_yishit",
+        "Hahnasat_nehe",
+        "Hahnasat_ptura",
+        "selfowned_income_s2"
+      ],
+      "code": "vars_to_check = [\n    'business_income_s2', 'other_wage_s2',\n    'capital_gains_s2', 'dividends_s2',\n    'Hahnasa_lelo_yishit', 'Hahnasat_nehe',\n    'Hahnasat_ptura', 'selfowned_income_s2'\n]\n\ncondition = pd.Series(False, index=merged_df.index)\nfor var in vars_to_check:\n    condition = condition | (\n        (merged_df[var] != 0) & ~merged_df[var].isna()\n    )\nmerged_df['tax_report'] = condition.astype(int)"
     },
     {
       "name": "labor_income_s2",
@@ -87,7 +111,10 @@
       "source": "tbl_hahnsotpratt87_21",
       "notebook": "compute_income_variables.ipynb",
       "logic": "Sum of wages_s2 (HahnasaSahar) and other_wage_s2 (Hahnasa_Aheret, e.g., pension from former employment). Missing values handled with min_count=1.",
-      "inputs": ["wages_s2", "other_wage_s2"],
+      "inputs": [
+        "wages_s2",
+        "other_wage_s2"
+      ],
       "code": "tbl_hahnsotpratt87_21['labor_income_s2'] = (\n    tbl_hahnsotpratt87_21[['wages_s2', 'other_wage_s2']]\n    .sum(axis=1, min_count=1)\n)"
     },
     {
@@ -97,7 +124,11 @@
       "source": "tbl_hahnsotpratt87_21, tbl_source",
       "notebook": "compute_income_variables.ipynb",
       "logic": "Sum of selfowned_income_s2, property_income_s2, and capital_gains_s2.",
-      "inputs": ["selfowned_income_s2", "property_income_s2", "capital_gains_s2"],
+      "inputs": [
+        "selfowned_income_s2",
+        "property_income_s2",
+        "capital_gains_s2"
+      ],
       "code": "merged_df['capital_income_s2'] = merged_df[[\n    'selfowned_income_s2',\n    'property_income_s2',\n    'capital_gains_s2'\n]].sum(axis=1, min_count=1)"
     },
     {
@@ -107,7 +138,11 @@
       "source": "tbl_hahnsotpratt87_21, tbl_source",
       "notebook": "compute_income_variables.ipynb",
       "logic": "Sum of labor_income_s2, capital_income_s2, and business_income_s2.",
-      "inputs": ["labor_income_s2", "capital_income_s2", "business_income_s2"],
+      "inputs": [
+        "labor_income_s2",
+        "capital_income_s2",
+        "business_income_s2"
+      ],
       "code": "merged_df['total_income_s2'] = merged_df[[\n    'labor_income_s2',\n    'capital_income_s2',\n    'business_income_s2'\n]].sum(axis=1, min_count=1)"
     },
     {
@@ -117,7 +152,11 @@
       "source": "tbl_hahnsotpratt87_21, tbl_source",
       "notebook": "compute_income_variables.ipynb",
       "logic": "Sum of wages_s2, capital_income_s2, and business_income_s2. Uses wages_s2 instead of labor_income_s2, excluding other_wage_s2.",
-      "inputs": ["wages_s2", "capital_income_s2", "business_income_s2"],
+      "inputs": [
+        "wages_s2",
+        "capital_income_s2",
+        "business_income_s2"
+      ],
       "code": "merged_df['total_income_r1_s2'] = merged_df[[\n    'wages_s2',\n    'capital_income_s2',\n    'business_income_s2'\n]].sum(axis=1, min_count=1)"
     },
     {
@@ -127,7 +166,10 @@
       "source": "tbl_hahnsotpratt87_21",
       "notebook": "compute_income_variables.ipynb",
       "logic": "Sum of property_income_s2 and capital_gains_s2. Excludes selfowned_income_s2.",
-      "inputs": ["property_income_s2", "capital_gains_s2"],
+      "inputs": [
+        "property_income_s2",
+        "capital_gains_s2"
+      ],
       "code": "merged_df['capital_income_r1_s2'] = merged_df[[\n    'property_income_s2',\n    'capital_gains_s2'\n]].sum(axis=1, min_count=1)"
     },
     {
@@ -137,7 +179,11 @@
       "source": "tbl_hahnsotpratt87_21, tbl_source",
       "notebook": "compute_income_variables.ipynb",
       "logic": "Sum of wages_s2, capital_income_r1_s2, and business_income_s2. Uses capital_income_r1_s2 which excludes self-owned business income.",
-      "inputs": ["wages_s2", "capital_income_r1_s2", "business_income_s2"],
+      "inputs": [
+        "wages_s2",
+        "capital_income_r1_s2",
+        "business_income_s2"
+      ],
       "code": "merged_df['total_income_r2_s2'] = merged_df[[\n    'wages_s2',\n    'capital_income_r1_s2',\n    'business_income_s2'\n]].sum(axis=1, min_count=1)"
     }
   ],
@@ -147,200 +193,269 @@
       "definition": "Benefits allocated from national accounts to individuals (fringe benefits)",
       "type": "benefits",
       "source": "national accounts",
-      "notebook": null,
+      "notebook": "strategy_3_vars_cbs_safe.ipynb",
       "logic": "Fringe benefits at the national level equal labor compensation minus employers' social contribution to national insurance and health tax minus all individual taxed wages minus other labor income. Amount from national accounts Row 52 (in million NIS). Allocated to individuals according to the distribution of wages_s2.",
-      "inputs": ["wages_s2"],
-      "code": ""
+      "inputs": [
+        "wages_s2"
+      ],
+      "code": "social_contribution = df_attributed_income.loc[1, year_int] * 1000000\nfiltered_df = df[df[\"wages_s2\"] > 0].copy()\ntotal_wage = filtered_df[\"wages_s2\"].sum()\nfiltered_df[\"benefits_allocated_s3\"] = (\n    (filtered_df[\"wages_s2\"] / total_wage) * social_contribution\n)\ndf = df.merge(filtered_df[[\"benefits_allocated_s3\"]],\n              left_index=True, right_index=True, how=\"left\")\ndf[\"benefits_allocated_s3\"] = df[\"benefits_allocated_s3\"].fillna(0)"
     },
     {
       "name": "benefits_allocated_r1_s3",
       "definition": "Benefits allocated from national accounts (alternative: labor compensation less social contributions less wages)",
       "type": "benefits",
       "source": "national accounts",
-      "notebook": null,
+      "notebook": "strategy_3_vars_cbs_safe.ipynb",
       "logic": "Fringe benefits at the national level equal labor compensation less employers' social contribution to national insurance and health tax less all individual taxed wages. Amount from national accounts Row n.45 (in million NIS). Allocated to individuals according to the distribution of wages_s2.",
-      "inputs": ["wages_s2"],
-      "code": ""
+      "inputs": [
+        "wages_s2"
+      ],
+      "code": "social_contribution = df_attributed_income.loc[2, year_int] * 1000000\nfiltered_df = df[df[\"wages_s2\"] > 0].copy()\ntotal_wage = filtered_df[\"wages_s2\"].sum()\nfiltered_df[\"benefits_allocated_r1_s3\"] = (\n    (filtered_df[\"wages_s2\"] / total_wage) * social_contribution\n)\ndf = df.merge(filtered_df[[\"benefits_allocated_r1_s3\"]],\n              left_index=True, right_index=True, how=\"left\")\ndf[\"benefits_allocated_r1_s3\"] = df[\"benefits_allocated_r1_s3\"].fillna(0)"
     },
     {
       "name": "labor_income_s3",
       "definition": "Total labor income including allocated benefits",
       "type": "wage",
       "source": "computed",
-      "notebook": null,
+      "notebook": "strategy_3_vars_cbs_safe.ipynb",
       "logic": "Sum of labor_income_s2 and benefits_allocated_s3.",
-      "inputs": ["labor_income_s2", "benefits_allocated_s3"],
-      "code": ""
+      "inputs": [
+        "labor_income_s2",
+        "benefits_allocated_s3"
+      ],
+      "code": "df[\"labor_income_s3\"] = df[\"labor_income_s2\"].add(\n    df[\"benefits_allocated_s3\"], fill_value=0\n)\ndf[\"labor_income_s3\"] = df[\"labor_income_s3\"].fillna(0)"
     },
     {
       "name": "labor_income_r1_s3",
       "definition": "Labor income variant r1 (wages + alternative benefits allocation)",
       "type": "wage",
       "source": "computed",
-      "notebook": null,
+      "notebook": "strategy_3_vars_cbs_safe.ipynb",
       "logic": "Sum of wages_s2 and benefits_allocated_r1_s3.",
-      "inputs": ["wages_s2", "benefits_allocated_r1_s3"],
-      "code": ""
+      "inputs": [
+        "wages_s2",
+        "benefits_allocated_r1_s3"
+      ],
+      "code": "df[\"labor_income_r1_s3\"] = df[\"wages_s2\"].add(\n    df[\"benefits_allocated_r1_s3\"], fill_value=0\n)\ndf[\"labor_income_r1_s3\"] = df[\"labor_income_r1_s3\"].fillna(0)"
     },
     {
       "name": "property_reported_income_s3",
       "definition": "Total reported property income (property + capital gains)",
       "type": "capital",
       "source": "computed",
-      "notebook": null,
+      "notebook": "strategy_3_vars_cbs_safe.ipynb",
       "logic": "Sum of property_income_s2 and capital_gains_s2.",
-      "inputs": ["property_income_s2", "capital_gains_s2"],
-      "code": ""
+      "inputs": [
+        "property_income_s2",
+        "capital_gains_s2"
+      ],
+      "code": "df[\"property_reported_income_s3\"] = df[\"property_income_s2\"].add(\n    df[\"capital_gains_s2\"], fill_value=0\n)\ndf[\"property_reported_income_s3\"] = df[\"property_reported_income_s3\"].fillna(0)"
     },
     {
       "name": "property_attributed_rent_s3",
       "definition": "Tax-exempt housing rent attributed from national accounts",
       "type": "capital",
       "source": "national accounts",
-      "notebook": null,
+      "notebook": "strategy_3_vars_cbs_safe.ipynb",
       "logic": "Tax-exempt housing rent. Amount from national accounts Row n.8 (in million NIS). Distributed among all individuals according to the distribution of property_reported_income_s3 among individuals with property_reported_income_s3 > 0.",
-      "inputs": ["property_reported_income_s3"],
-      "code": ""
+      "inputs": [
+        "property_reported_income_s3"
+      ],
+      "code": "rent_amount = df_attributed_income.loc[3, year_int] * 1000000\nfiltered_df = df[df[\"property_reported_income_s3\"] > 0].copy()\ntotal = filtered_df[\"property_reported_income_s3\"].sum()\nfiltered_df[\"property_attributed_rent_s3\"] = (\n    (filtered_df[\"property_reported_income_s3\"] / total) * rent_amount\n)\ndf = df.merge(filtered_df[[\"property_attributed_rent_s3\"]],\n              left_index=True, right_index=True, how=\"left\")\ndf[\"property_attributed_rent_s3\"] = df[\"property_attributed_rent_s3\"].fillna(0)"
     },
     {
       "name": "property_attributed_income_s3",
       "definition": "Taxable property income attributed to non-filers from national accounts",
       "type": "capital",
       "source": "national accounts",
-      "notebook": null,
-      "logic": "Taxable property income of employees who are not required to submit an annual tax report. Amount from national accounts Row n.22 (in million NIS). Distributed among individuals with tax_report=0 according to the distribution of property_reported_income_s3 among individuals with tax_report=1.",
-      "inputs": ["property_reported_income_s3", "tax_report"],
-      "code": ""
+      "notebook": "strategy_3_vars_cbs_safe.ipynb",
+      "logic": "Taxable property income of employees who are not required to submit an annual tax report. Amount from national accounts Row n.22 (in million NIS). Distributed using quantile matching: a reference group (tax_report=1, wages_s2>0, property_reported_income_s3>0) establishes the relationship between wage quantiles and property income. For the target group (tax_report=0, wages_s2>0), each individual's wage percentile is mapped to a property income value via linear interpolation on the reference distribution, with min/max extrapolation for out-of-range percentiles. Negative predictions are floored at zero, and all predictions are scaled so their sum equals the national accounts total.",
+      "inputs": [
+        "wages_s2",
+        "tax_report",
+        "property_reported_income_s3"
+      ],
+      "code": "def create_property_attributed_income(df, total_amount):\n    result_df = df.copy()\n    result_df[\"property_attributed_income_s3\"] = 0\n    mask_target = (result_df[\"tax_report\"] == 0) & (result_df[\"wages_s2\"] > 0)\n    mask_ref = (\n        (result_df[\"tax_report\"] == 1)\n        & (result_df[\"wages_s2\"] > 0)\n        & (result_df[\"property_reported_income_s3\"] > 0)\n    )\n    ref_wages = result_df.loc[mask_ref, \"wages_s2\"].values\n    ref_property = result_df.loc[mask_ref, \"property_reported_income_s3\"].values\n    target_wages = result_df.loc[mask_target, \"wages_s2\"].values\n    idx = np.argsort(ref_wages)\n    sorted_wages = ref_wages[idx]\n    sorted_property = ref_property[idx]\n    ref_pct = np.linspace(0, 1, len(sorted_wages))\n    target_pct = stats.rankdata(target_wages, method=\"average\") / len(target_wages)\n    f_interp = interp1d(\n        ref_pct, sorted_property, kind=\"linear\",\n        bounds_error=False,\n        fill_value=(sorted_property[0], sorted_property[-1])\n    )\n    raw = np.maximum(f_interp(target_pct), 0)\n    scale = total_amount / raw.sum() if raw.sum() > 0 else 0\n    result_df.loc[mask_target, \"property_attributed_income_s3\"] = raw * scale\n    return result_df\n\namount = df_attributed_income.loc[4, year_int] * 1000000\ndf = create_property_attributed_income(df, amount)\ndf[\"property_attributed_income_s3\"] = df[\"property_attributed_income_s3\"].fillna(0)"
     },
     {
       "name": "property_income_s3",
       "definition": "Total property income (reported + attributed rent)",
       "type": "capital",
       "source": "computed",
-      "notebook": null,
+      "notebook": "strategy_3_vars_cbs_safe.ipynb",
       "logic": "Sum of property_reported_income_s3 and property_attributed_rent_s3.",
-      "inputs": ["property_reported_income_s3", "property_attributed_rent_s3"],
-      "code": ""
+      "inputs": [
+        "property_reported_income_s3",
+        "property_attributed_rent_s3"
+      ],
+      "code": "df[\"property_income_s3\"] = df[\"property_reported_income_s3\"].add(\n    df[\"property_attributed_rent_s3\"], fill_value=0\n)\ndf[\"property_income_s3\"] = df[\"property_income_s3\"].fillna(0)"
     },
     {
       "name": "property_income_r1_s3",
       "definition": "Total property income variant r1 (reported + attributed rent + attributed income)",
       "type": "capital",
       "source": "computed",
-      "notebook": null,
+      "notebook": "strategy_3_vars_cbs_safe.ipynb",
       "logic": "Sum of property_reported_income_s3, property_attributed_rent_s3, and property_attributed_income_s3.",
-      "inputs": ["property_reported_income_s3", "property_attributed_rent_s3", "property_attributed_income_s3"],
-      "code": ""
+      "inputs": [
+        "property_reported_income_s3",
+        "property_attributed_rent_s3",
+        "property_attributed_income_s3"
+      ],
+      "code": "df[\"property_income_r1_s3\"] = df[[\n    \"property_reported_income_s3\",\n    \"property_attributed_rent_s3\",\n    \"property_attributed_income_s3\"\n]].sum(axis=1, min_count=1)\ndf[\"property_income_r1_s3\"] = df[\"property_income_r1_s3\"].fillna(0)"
     },
     {
       "name": "profits_attributed_income_s3",
       "definition": "Business profits attributed from national accounts",
       "type": "capital",
       "source": "national accounts",
-      "notebook": null,
+      "notebook": "strategy_3_vars_cbs_safe.ipynb",
       "logic": "Attributed business income (business_income_s2). Amount from national accounts Row n.28 (in million NIS). Distributed among all individuals according to the distribution of property_reported_income_s3 among individuals with property_reported_income_s3 > 0.",
-      "inputs": ["business_income_s2", "property_reported_income_s3"],
-      "code": ""
+      "inputs": [
+        "property_reported_income_s3"
+      ],
+      "code": "profits_amount = df_attributed_income.loc[5, year_int] * 1000000\nfiltered_df = df[df[\"property_reported_income_s3\"] > 0].copy()\ntotal = filtered_df[\"property_reported_income_s3\"].sum()\nfiltered_df[\"profits_attributed_income_s3\"] = (\n    (filtered_df[\"property_reported_income_s3\"] / total) * profits_amount\n)\ndf = df.merge(filtered_df[[\"profits_attributed_income_s3\"]],\n              left_index=True, right_index=True, how=\"left\")\ndf[\"profits_attributed_income_s3\"] = df[\"profits_attributed_income_s3\"].fillna(0)"
     },
     {
       "name": "capital_income_s3",
       "definition": "Total capital income (property + attributed profits + self-owned)",
       "type": "capital",
       "source": "computed",
-      "notebook": null,
+      "notebook": "strategy_3_vars_cbs_safe.ipynb",
       "logic": "Sum of property_income_s3, profits_attributed_income_s3, and selfowned_income_s2.",
-      "inputs": ["property_income_s3", "profits_attributed_income_s3", "selfowned_income_s2"],
-      "code": ""
+      "inputs": [
+        "property_income_s3",
+        "profits_attributed_income_s3",
+        "selfowned_income_s2"
+      ],
+      "code": "df[\"capital_income_s3\"] = df[[\n    \"property_income_s3\",\n    \"profits_attributed_income_s3\",\n    \"selfowned_income_s2\"\n]].sum(axis=1, min_count=1)\ndf[\"capital_income_s3\"] = df[\"capital_income_s3\"].fillna(0)"
     },
     {
       "name": "capital_income_r1_s3",
       "definition": "Capital income variant r1 (property + attributed profits, excluding self-owned)",
       "type": "capital",
       "source": "computed",
-      "notebook": null,
+      "notebook": "strategy_3_vars_cbs_safe.ipynb",
       "logic": "Sum of property_income_s3 and profits_attributed_income_s3.",
-      "inputs": ["property_income_s3", "profits_attributed_income_s3"],
-      "code": ""
+      "inputs": [
+        "property_income_s3",
+        "profits_attributed_income_s3"
+      ],
+      "code": "df[\"capital_income_r1_s3\"] = df[[\n    \"property_income_s3\",\n    \"profits_attributed_income_s3\"\n]].sum(axis=1, min_count=1)\ndf[\"capital_income_r1_s3\"] = df[\"capital_income_r1_s3\"].fillna(0)"
     },
     {
       "name": "capital_income_r2_s3",
       "definition": "Capital income variant r2 (property_r1 + attributed profits)",
       "type": "capital",
       "source": "computed",
-      "notebook": null,
-      "logic": "Sum of property_income_r1_s3 and profits_attributed_income_s3.",
-      "inputs": ["property_income_r1_s3", "profits_attributed_income_s3"],
-      "code": ""
+      "notebook": "strategy_3_vars_cbs_safe.ipynb",
+      "logic": "Sum of property_income_r1_s3 and property_attributed_income_s3.",
+      "inputs": [
+        "property_income_r1_s3",
+        "property_attributed_income_s3"
+      ],
+      "code": "df[\"capital_income_r2_s3\"] = df[[\n    \"property_income_r1_s3\",\n    \"property_attributed_income_s3\"\n]].sum(axis=1, min_count=1)\ndf[\"capital_income_r2_s3\"] = df[\"capital_income_r2_s3\"].fillna(0)"
     },
     {
       "name": "income_nonfilers_s3",
       "definition": "Imputed income for non-filers (30% of average total_income_r1_s2)",
       "type": "demographics",
       "source": "computed",
-      "notebook": null,
+      "notebook": "strategy_3_vars_cbs_safe.ipynb",
       "logic": "Set to 0.3 multiplied by the average of total_income_r1_s2. Applied to non-filer observations added from population aggregates.",
-      "inputs": ["total_income_r1_s2"],
-      "code": ""
+      "inputs": [
+        "total_income_r1_s2",
+        "added_rows"
+      ],
+      "code": "avg_total_income_r1_s2 = df[\"total_income_r1_s2\"].mean()\ndf[\"income_nonfilers_s3\"] = 0\ndf.loc[df[\"added_rows\"] == 1, \"income_nonfilers_s3\"] = (\n    avg_total_income_r1_s2 * 0.3\n)"
     },
     {
       "name": "total_income_s3",
       "definition": "Total income (labor + capital + business + non-filer imputation)",
       "type": "wage, capital",
       "source": "computed",
-      "notebook": null,
+      "notebook": "strategy_3_vars_cbs_safe.ipynb",
       "logic": "Sum of labor_income_s3, capital_income_s3, business_income_s2, and income_nonfilers_s3.",
-      "inputs": ["labor_income_s3", "capital_income_s3", "business_income_s2", "income_nonfilers_s3"],
-      "code": ""
+      "inputs": [
+        "labor_income_s3",
+        "capital_income_s3",
+        "business_income_s2",
+        "income_nonfilers_s3"
+      ],
+      "code": "df[\"total_income_s3\"] = df[[\n    \"labor_income_s3\",\n    \"capital_income_s3\",\n    \"business_income_s2\",\n    \"income_nonfilers_s3\"\n]].sum(axis=1, min_count=1)\ndf[\"total_income_s3\"] = df[\"total_income_s3\"].fillna(0)"
     },
     {
       "name": "total_income_r1_s3",
       "definition": "Total income variant r1 (labor_r1 + capital + business + non-filers)",
       "type": "wage, capital",
       "source": "computed",
-      "notebook": null,
+      "notebook": "strategy_3_vars_cbs_safe.ipynb",
       "logic": "Sum of labor_income_r1_s3, capital_income_s3, business_income_s2, and income_nonfilers_s3.",
-      "inputs": ["labor_income_r1_s3", "capital_income_s3", "business_income_s2", "income_nonfilers_s3"],
-      "code": ""
+      "inputs": [
+        "labor_income_r1_s3",
+        "capital_income_s3",
+        "business_income_s2",
+        "income_nonfilers_s3"
+      ],
+      "code": "df[\"total_income_r1_s3\"] = df[[\n    \"labor_income_r1_s3\",\n    \"capital_income_s3\",\n    \"business_income_s2\",\n    \"income_nonfilers_s3\"\n]].sum(axis=1, min_count=1)\ndf[\"total_income_r1_s3\"] = df[\"total_income_r1_s3\"].fillna(0)"
     },
     {
       "name": "total_income_r4_s3",
       "definition": "Total income variant r4 (labor_r1 + property + business)",
       "type": "wage, capital",
       "source": "computed",
-      "notebook": null,
+      "notebook": "strategy_3_vars_cbs_safe.ipynb",
       "logic": "Sum of labor_income_r1_s3, property_income_s3, and business_income_s2.",
-      "inputs": ["labor_income_r1_s3", "property_income_s3", "business_income_s2"],
-      "code": ""
+      "inputs": [
+        "labor_income_r1_s3",
+        "property_income_s3",
+        "business_income_s2"
+      ],
+      "code": "df[\"total_income_r4_s3\"] = df[[\n    \"labor_income_r1_s3\",\n    \"property_income_s3\",\n    \"business_income_s2\"\n]].sum(axis=1, min_count=1)\ndf[\"total_income_r4_s3\"] = df[\"total_income_r4_s3\"].fillna(0)"
     },
     {
       "name": "total_income_r5_s3",
       "definition": "Total income variant r5 (labor_r1 + property + business + attributed profits)",
       "type": "wage, capital",
       "source": "computed",
-      "notebook": null,
+      "notebook": "strategy_3_vars_cbs_safe.ipynb",
       "logic": "Sum of labor_income_r1_s3, property_income_s3, business_income_s2, and profits_attributed_income_s3.",
-      "inputs": ["labor_income_r1_s3", "property_income_s3", "business_income_s2", "profits_attributed_income_s3"],
-      "code": ""
+      "inputs": [
+        "labor_income_r1_s3",
+        "property_income_s3",
+        "business_income_s2",
+        "profits_attributed_income_s3"
+      ],
+      "code": "df[\"total_income_r5_s3\"] = df[[\n    \"labor_income_r1_s3\",\n    \"property_income_s3\",\n    \"business_income_s2\",\n    \"profits_attributed_income_s3\"\n]].sum(axis=1, min_count=1)\ndf[\"total_income_r5_s3\"] = df[\"total_income_r5_s3\"].fillna(0)"
     },
     {
       "name": "income_nonfilers_r1_s3",
       "definition": "Imputed income for non-filers variant r1 (30% of average total_income_r4_s3)",
       "type": "demographics",
       "source": "computed",
-      "notebook": null,
+      "notebook": "strategy_3_vars_cbs_safe.ipynb",
       "logic": "Set to 0.3 multiplied by the average of total_income_r4_s3.",
-      "inputs": ["total_income_r4_s3"],
-      "code": ""
+      "inputs": [
+        "total_income_r4_s3",
+        "added_rows"
+      ],
+      "code": "avg_total_income_r4_s3 = df[\"total_income_r4_s3\"].mean()\ndf[\"income_nonfilers_r1_s3\"] = 0\ndf.loc[df[\"added_rows\"] == 1, \"income_nonfilers_r1_s3\"] = (\n    avg_total_income_r4_s3 * 0.3\n)"
     },
     {
       "name": "total_income_r6_s3",
       "definition": "Total income variant r6 (labor_r1 + property + business + profits + non-filers_r1)",
       "type": "wage, capital",
       "source": "computed",
-      "notebook": null,
+      "notebook": "strategy_3_vars_cbs_safe.ipynb",
       "logic": "Sum of labor_income_r1_s3, property_income_s3, business_income_s2, profits_attributed_income_s3, and income_nonfilers_r1_s3.",
-      "inputs": ["labor_income_r1_s3", "property_income_s3", "business_income_s2", "profits_attributed_income_s3", "income_nonfilers_r1_s3"],
-      "code": ""
+      "inputs": [
+        "labor_income_r1_s3",
+        "property_income_s3",
+        "business_income_s2",
+        "profits_attributed_income_s3",
+        "income_nonfilers_r1_s3"
+      ],
+      "code": "df[\"total_income_r6_s3\"] = df[[\n    \"labor_income_r1_s3\",\n    \"property_income_s3\",\n    \"business_income_s2\",\n    \"profits_attributed_income_s3\",\n    \"income_nonfilers_r1_s3\"\n]].sum(axis=1, min_count=1)\ndf[\"total_income_r6_s3\"] = df[\"total_income_r6_s3\"].fillna(0)"
     }
   ],
   "Strategy 4": [
@@ -351,7 +466,10 @@
       "source": "tbl_misrot27_21",
       "notebook": "strategy_4_creates_variables_1.ipynb",
       "logic": "Coalesce of koteret_mis_tik_fic (actual workplace tax file ID) and pseudo_firm2 (industry 2-digit code). Uses the actual firm ID when available, falling back to industry code when the firm ID is missing.",
-      "inputs": ["koteret_mis_tik_fic", "pseudo_firm2"],
+      "inputs": [
+        "koteret_mis_tik_fic",
+        "pseudo_firm2"
+      ],
       "code": "df['firm_id'] = df['koteret_mis_tik_fic'].fillna(\n    df['pseudo_firm2']\n)"
     },
     {
@@ -361,7 +479,10 @@
       "source": "tbl_misrot27_21",
       "notebook": "strategy_4_creates_variables_2.ipynb",
       "logic": "Count of individual IDs (MisparTeudatZehut_fic) grouped by firm_id. Gives the number of employees in each firm for that year. Used to distinguish small firms (<20) from large firms for profit distribution.",
-      "inputs": ["firm_id", "MisparTeudatZehut_fic"],
+      "inputs": [
+        "firm_id",
+        "MisparTeudatZehut_fic"
+      ],
       "code": "df['firm_size'] = df.groupby('firm_id')[\n    'MisparTeudatZehut_fic'\n].transform('count')"
     },
     {
@@ -415,7 +536,10 @@
       "source": "tbl_misrot27_21",
       "notebook": "strategy_4_creates_variables_1.ipynb",
       "logic": "Sum of hafra_mavid_kitsva and hafra_mavid_ovdan, each clipped at 0 (negatives removed), missing set to 0.",
-      "inputs": ["hafra_mavid_kitsva", "hafra_mavid_ovdan"],
+      "inputs": [
+        "hafra_mavid_kitsva",
+        "hafra_mavid_ovdan"
+      ],
       "code": "df['pension_employer_s4'] = (\n    df['hafra_mavid_kitsva'].clip(lower=0).fillna(0)\n    + df['hafra_mavid_ovdan'].clip(lower=0).fillna(0)\n)"
     },
     {
@@ -425,7 +549,10 @@
       "source": "tbl_misrot27_21",
       "notebook": "strategy_4_creates_variables_1.ipynb",
       "logic": "Sum of hafra_oved_kitsva and hafra_oved_ovdan, each clipped at 0, missing set to 0.",
-      "inputs": ["hafra_oved_kitsva", "hafra_oved_ovdan"],
+      "inputs": [
+        "hafra_oved_kitsva",
+        "hafra_oved_ovdan"
+      ],
       "code": "df['pension_employee_s4'] = (\n    df['hafra_oved_kitsva'].clip(lower=0).fillna(0)\n    + df['hafra_oved_ovdan'].clip(lower=0).fillna(0)\n)"
     },
     {
@@ -435,7 +562,9 @@
       "source": "tbl_misrot27_21",
       "notebook": "strategy_4_creates_variables_1.ipynb",
       "logic": "Set to 1 for specific SectorMeuchad codes (110010, 110015, 121000, 131100, 131110, 131300, 131400, 131500). Set to 0 for private sector codes and range 122010–129030.",
-      "inputs": ["SectorMeuchad"],
+      "inputs": [
+        "SectorMeuchad"
+      ],
       "code": "df['public_sector'] = np.nan\n\npublic_sector_codes = [\n    110010, 110015, 121000, 131100,\n    131110, 131300, 131400, 131500\n]\ndf.loc[\n    df['SectorMeuchad'].isin(public_sector_codes),\n    'public_sector'\n] = 1\n\nprivate_sector_codes = [\n    110020, 110021, 110030, 140000,\n    150020, 150030, 999999\n]\nrange_condition = (\n    (df['SectorMeuchad'] >= 122010)\n    & (df['SectorMeuchad'] <= 129030)\n)\ndf.loc[\n    df['SectorMeuchad'].isin(private_sector_codes)\n    | range_condition,\n    'public_sector'\n] = 0"
     },
     {
@@ -445,7 +574,10 @@
       "source": "tbl_misrot27_21",
       "notebook": "strategy_4_creates_variables_1.ipynb",
       "logic": "Current year minus prat_shnat_avodaStart, only when start year is non-missing and >= 0.",
-      "inputs": ["shana", "prat_shnat_avodaStart"],
+      "inputs": [
+        "shana",
+        "prat_shnat_avodaStart"
+      ],
       "code": "df['tenure'] = np.where(\n    (pd.notna(df['prat_shnat_avodaStart']))\n    & (df['prat_shnat_avodaStart'] >= 0),\n    df['shana'] - df['prat_shnat_avodaStart'],\n    np.nan\n)"
     },
     {
@@ -455,7 +587,12 @@
       "source": "tbl_misrot27_21",
       "notebook": "strategy_4_creates_variables_1.ipynb",
       "logic": "2% × masc_basis_kitsva × tenure, only for public sector workers who started before 2004 and have positive masc_basis_kitsva. Otherwise 0.",
-      "inputs": ["masc_basis_kitsva", "tenure", "public_sector", "prat_shnat_avodaStart"],
+      "inputs": [
+        "masc_basis_kitsva",
+        "tenure",
+        "public_sector",
+        "prat_shnat_avodaStart"
+      ],
       "code": "df['pension_budgetary_s4'] = 0\n\nmask = (\n    (df['masc_basis_kitsva'] > 0)\n    & (df['prat_shnat_avodaStart'] < 2004)\n    & (df['public_sector'] == 1)\n)\n\ndf.loc[mask, 'pension_budgetary_s4'] = (\n    0.02\n    * df.loc[mask, 'masc_basis_kitsva']\n    * df.loc[mask, 'tenure']\n)"
     },
     {
@@ -465,7 +602,11 @@
       "source": "tbl_misrot27_21",
       "notebook": "strategy_4_creates_variables_1.ipynb",
       "logic": "Sum of pension_employer_s4, pension_employee_s4, pension_budgetary_s4. Missing filled with 0.",
-      "inputs": ["pension_employer_s4", "pension_employee_s4", "pension_budgetary_s4"],
+      "inputs": [
+        "pension_employer_s4",
+        "pension_employee_s4",
+        "pension_budgetary_s4"
+      ],
       "code": "df['pension_all_s4'] = df[[\n    'pension_employer_s4',\n    'pension_employee_s4',\n    'pension_budgetary_s4'\n]].sum(axis=1, min_count=1)\ndf['pension_all_s4'] = df['pension_all_s4'].fillna(0)"
     },
     {
@@ -497,7 +638,9 @@
       "source": "tbl_misrot27_21",
       "notebook": "strategy_4_creates_variables_1.ipynb",
       "logic": "hafra_mavid_hish when positive, 0 otherwise.",
-      "inputs": ["hafra_mavid_hish"],
+      "inputs": [
+        "hafra_mavid_hish"
+      ],
       "code": "df['kh_employer_s4'] = 0\nmask = df['hafra_mavid_hish'] > 0\ndf.loc[mask, 'kh_employer_s4'] = (\n    df.loc[mask, 'hafra_mavid_hish']\n)"
     },
     {
@@ -507,7 +650,9 @@
       "source": "tbl_misrot27_21",
       "notebook": "strategy_4_creates_variables_1.ipynb",
       "logic": "hafra_oved_hish when positive, 0 otherwise.",
-      "inputs": ["hafra_oved_hish"],
+      "inputs": [
+        "hafra_oved_hish"
+      ],
       "code": "df['kh_employee_s4'] = 0\nmask = df['hafra_oved_hish'] > 0\ndf.loc[mask, 'kh_employee_s4'] = (\n    df.loc[mask, 'hafra_oved_hish']\n)"
     },
     {
@@ -517,7 +662,10 @@
       "source": "tbl_misrot27_21",
       "notebook": "strategy_4_creates_variables_1.ipynb",
       "logic": "Sum of kh_employer_s4 and kh_employee_s4. Missing filled with 0.",
-      "inputs": ["kh_employer_s4", "kh_employee_s4"],
+      "inputs": [
+        "kh_employer_s4",
+        "kh_employee_s4"
+      ],
       "code": "df['kh_all_s4'] = df[[\n    'kh_employer_s4',\n    'kh_employee_s4'\n]].sum(axis=1, min_count=1)\ndf['kh_all_s4'] = df['kh_all_s4'].fillna(0)"
     },
     {
@@ -527,7 +675,10 @@
       "source": "tbl_misrot27_21",
       "notebook": "strategy_4_creates_variables_2.ipynb",
       "logic": "Sum of pension_all_s4 and kh_all_s4. Missing filled with 0.",
-      "inputs": ["pension_all_s4", "kh_all_s4"],
+      "inputs": [
+        "pension_all_s4",
+        "kh_all_s4"
+      ],
       "code": "df['benefits_1_s4'] = df[[\n    'pension_all_s4',\n    'kh_all_s4'\n]].sum(axis=1, min_count=1)\ndf['benefits_1_s4'] = df['benefits_1_s4'].fillna(0)"
     },
     {
@@ -537,7 +688,11 @@
       "source": "tbl_misrot27_21, firm data",
       "notebook": "strategy_4_creates_variables_2.ipynb",
       "logic": "14% of labor_costs_leep distributed to workers according to their wage share within the firm (wages_s2 / sum of firm wages).",
-      "inputs": ["labor_costs_leep", "wages_s2", "firm_id"],
+      "inputs": [
+        "labor_costs_leep",
+        "wages_s2",
+        "firm_id"
+      ],
       "code": "df['labor_costs_leep'] = df['labor_costs_leep'].fillna(0)\nlabor_costs_14_pct = df['labor_costs_leep'] * 0.14\n\ndf['benefits_1_allocated_s4'] = 0\n\nsum_wages = df.groupby('firm_id')[\n    'wages_s2'\n].transform('sum')\n\ndf['wage_share'] = df['wages_s2'] / sum_wages\n\ndf['benefits_1_allocated_s4'] = (\n    df['wage_share'] * labor_costs_14_pct\n)\ndf = df.drop(['wage_share'], axis=1)\ndf['benefits_1_allocated_s4'] = (\n    df['benefits_1_allocated_s4'].fillna(0)\n)"
     },
     {
@@ -547,7 +702,10 @@
       "source": "tbl_misrot27_21, firm data",
       "notebook": "strategy_4_creates_variables_2.ipynb",
       "logic": "Sum of benefits_1_s4 and benefits_1_allocated_s4. Missing filled with 0.",
-      "inputs": ["benefits_1_s4", "benefits_1_allocated_s4"],
+      "inputs": [
+        "benefits_1_s4",
+        "benefits_1_allocated_s4"
+      ],
       "code": "df['benefits_2_s4'] = df[[\n    'benefits_1_s4',\n    'benefits_1_allocated_s4'\n]].sum(axis=1, min_count=1)\ndf['benefits_2_s4'] = df['benefits_2_s4'].fillna(0)"
     },
     {
@@ -557,7 +715,10 @@
       "source": "tbl_hahnsotpratt87_21, tbl_misrot27_21",
       "notebook": "strategy_4_creates_variables_2.ipynb",
       "logic": "Sum of wages_s2 and benefits_2_s4. Missing filled with 0.",
-      "inputs": ["wages_s2", "benefits_2_s4"],
+      "inputs": [
+        "wages_s2",
+        "benefits_2_s4"
+      ],
       "code": "df['labor_income_s4'] = df[[\n    'wages_s2',\n    'benefits_2_s4'\n]].sum(axis=1, min_count=1)\ndf['labor_income_s4'] = df['labor_income_s4'].fillna(0)"
     },
     {
@@ -567,7 +728,12 @@
       "source": "firm data",
       "notebook": "strategy_4_creates_variables_2.ipynb",
       "logic": "For firms with 20+ workers: profits distributed to top 10% earners by wage share. For firms <20: distributed equally. Self-owned income subtracted.",
-      "inputs": ["profits_mirsham", "wages_s2", "firm_id", "selfowned_income_s2"],
+      "inputs": [
+        "profits_mirsham",
+        "wages_s2",
+        "firm_id",
+        "selfowned_income_s2"
+      ],
       "code": "df['firm_size'] = df.groupby('firm_id')[\n    'MisparTeudatZehut_fic'\n].transform('count')\n\nsmall_firm_mask = df['firm_size'] < 20\n\ndf['wage_percentile'] = df.groupby('firm_id')[\n    'wages_s2'\n].transform(lambda x: x.rank(pct=True))\n\ntop_10_mask = (\n    (df['wage_percentile'] >= 0.9)\n    & (~small_firm_mask)\n)\n\ndf['profits_5_s4'] = 0\n\n# Large firms: top 10% by wage share\nsum_top_wages = df[top_10_mask].groupby(\n    'firm_id'\n)['wages_s2'].transform('sum')\ndf.loc[top_10_mask, 'wage_share'] = (\n    df.loc[top_10_mask, 'wages_s2']\n    / sum_top_wages\n)\ndf.loc[top_10_mask, 'profits_5_s4'] = (\n    df.loc[top_10_mask, 'wage_share']\n    * df.loc[top_10_mask, 'profits_mirsham']\n)\n\n# Small firms: equal distribution\ndf.loc[small_firm_mask, 'profits_5_s4'] = (\n    df.loc[small_firm_mask, 'profits_mirsham']\n    / df.loc[small_firm_mask, 'firm_size']\n)\n\ndf['profits_5_s4'] = (\n    df['profits_5_s4']\n    - df['selfowned_income_s2'].fillna(0)\n)\ndf['profits_5_s4'] = df['profits_5_s4'].fillna(0)"
     },
     {
@@ -577,7 +743,12 @@
       "source": "firm data",
       "notebook": "strategy_4_creates_variables_2.ipynb",
       "logic": "Distributed to current workers with property_income_s3 > 0 and former workers with positive property income history. Profits split equally among eligible workers per firm. Self-owned income subtracted.",
-      "inputs": ["profits_mirsham", "firm_id", "selfowned_income_s2", "property_income_s3"],
+      "inputs": [
+        "profits_mirsham",
+        "firm_id",
+        "selfowned_income_s2",
+        "property_income_s3"
+      ],
       "code": "df = create_profits_6_s4(\n    df,\n    firm_positive_income_property_workers_history,\n    year_int\n)\ndf['profits_6_s4'] = (\n    df['profits_6_s4']\n    - df['selfowned_income_s2'].fillna(0)\n)\ndf['profits_6_s4'] = df['profits_6_s4'].fillna(0)"
     },
     {
@@ -587,7 +758,10 @@
       "source": "tbl_hahnsotpratt87_21, tbl_source",
       "notebook": "strategy_4_creates_variables_2.ipynb",
       "logic": "Sum of property_income_s3 and selfowned_income_s2.",
-      "inputs": ["property_income_s3", "selfowned_income_s2"],
+      "inputs": [
+        "property_income_s3",
+        "selfowned_income_s2"
+      ],
       "code": "df['capital_income_4_s4'] = df[[\n    'property_income_s3',\n    'selfowned_income_s2'\n]].sum(axis=1, min_count=1)\ndf['capital_income_4_s4'] = (\n    df['capital_income_4_s4'].fillna(0)\n)"
     },
     {
@@ -597,7 +771,11 @@
       "source": "tbl_hahnsotpratt87_21, tbl_source, firm data",
       "notebook": "strategy_4_creates_variables_2.ipynb",
       "logic": "Sum of property_income_s3, profits_6_s4, and selfowned_income_s2.",
-      "inputs": ["property_income_s3", "profits_6_s4", "selfowned_income_s2"],
+      "inputs": [
+        "property_income_s3",
+        "profits_6_s4",
+        "selfowned_income_s2"
+      ],
       "code": "df['capital_income_5_s4'] = df[[\n    'property_income_s3',\n    'profits_6_s4',\n    'selfowned_income_s2'\n]].sum(axis=1, min_count=1)\ndf['capital_income_5_s4'] = (\n    df['capital_income_5_s4'].fillna(0)\n)"
     },
     {
@@ -607,7 +785,11 @@
       "source": "tbl_hahnsotpratt87_21, tbl_misrot27_21",
       "notebook": "strategy_4_creates_variables_2.ipynb",
       "logic": "Sum of labor_income_s4, property_income_s3, and business_income_s2.",
-      "inputs": ["labor_income_s4", "property_income_s3", "business_income_s2"],
+      "inputs": [
+        "labor_income_s4",
+        "property_income_s3",
+        "business_income_s2"
+      ],
       "code": "df['total_income_2_s4'] = df[[\n    'labor_income_s4',\n    'property_income_s3',\n    'business_income_s2'\n]].sum(axis=1, min_count=1)\ndf['total_income_2_s4'] = (\n    df['total_income_2_s4'].fillna(0)\n)"
     },
     {
@@ -617,7 +799,10 @@
       "source": "computed",
       "notebook": "strategy_4_creates_variables_2.ipynb",
       "logic": "For rows where added_rows == 1 (non-filers): set to 30% of mean total_income_2_s4. Otherwise 0.",
-      "inputs": ["total_income_2_s4", "added_rows"],
+      "inputs": [
+        "total_income_2_s4",
+        "added_rows"
+      ],
       "code": "avg = df['total_income_2_s4'].mean()\ndf['income_nonfilers_s4'] = 0\ndf.loc[\n    df['added_rows'] == 1,\n    'income_nonfilers_s4'\n] = avg * 0.3"
     },
     {
@@ -627,7 +812,13 @@
       "source": "tbl_hahnsotpratt87_21, tbl_misrot27_21, firm data",
       "notebook": "strategy_4_creates_variables_2.ipynb",
       "logic": "Sum of labor_income_s4, property_income_s3, business_income_s2, selfowned_income_s2, and profits_6_s4.",
-      "inputs": ["labor_income_s4", "property_income_s3", "business_income_s2", "selfowned_income_s2", "profits_6_s4"],
+      "inputs": [
+        "labor_income_s4",
+        "property_income_s3",
+        "business_income_s2",
+        "selfowned_income_s2",
+        "profits_6_s4"
+      ],
       "code": "df['total_income_5_s4'] = df[[\n    'labor_income_s4',\n    'property_income_s3',\n    'business_income_s2',\n    'selfowned_income_s2',\n    'profits_6_s4'\n]].sum(axis=1, min_count=1)\ndf['total_income_5_s4'] = (\n    df['total_income_5_s4'].fillna(0)\n)"
     },
     {
@@ -637,7 +828,14 @@
       "source": "tbl_hahnsotpratt87_21, tbl_misrot27_21, firm data",
       "notebook": "strategy_4_creates_variables_2.ipynb",
       "logic": "Sum of labor_income_s4, property_income_s3, business_income_s2, selfowned_income_s2, profits_6_s4, and income_nonfilers_s4.",
-      "inputs": ["labor_income_s4", "property_income_s3", "business_income_s2", "selfowned_income_s2", "profits_6_s4", "income_nonfilers_s4"],
+      "inputs": [
+        "labor_income_s4",
+        "property_income_s3",
+        "business_income_s2",
+        "selfowned_income_s2",
+        "profits_6_s4",
+        "income_nonfilers_s4"
+      ],
       "code": "df['total_income_6_s4'] = df[[\n    'labor_income_s4',\n    'property_income_s3',\n    'business_income_s2',\n    'selfowned_income_s2',\n    'profits_6_s4',\n    'income_nonfilers_s4'\n]].sum(axis=1, min_count=1)\ndf['total_income_6_s4'] = (\n    df['total_income_6_s4'].fillna(0)\n)"
     },
     {
@@ -647,7 +845,14 @@
       "source": "computed",
       "notebook": "simple_analysis.txt",
       "logic": "Population: ages 20–67 with positive labor income, at firms with ≥5 workers. Compute ln(labor_income_s4), define age categories (20–35, 36–50, 51–67), then run reghdfe ln_labor, absorb(labor_fe = firm_id, i.age_cat, i.male, i.jew, i.ba). The saved firm fixed effect is the labor premium, deduplicated at the firm level.",
-      "inputs": ["labor_income_s4", "firm_id", "age", "male", "jew", "ba"],
+      "inputs": [
+        "labor_income_s4",
+        "firm_id",
+        "age",
+        "male",
+        "jew",
+        "ba"
+      ],
       "code": "* Create log labor income (skip negatives/zeros)\ngen ln_labor = ln($labor_income) if $labor_income > 0\n\n* Filter to working age (20-67)\nkeep if $age >= 20 & $age <= 67\n\n* Create age categories\ngen age_cat = .\nreplace age_cat = 1 if $age >= 20 & $age <= 35\nreplace age_cat = 2 if $age >= 36 & $age <= 50\nreplace age_cat = 3 if $age >= 51 & $age <= 67\n\n* Keep only observations with valid labor income\nkeep if !missing(ln_labor)\n\n* Keep firms with >= 5 workers\nbys firm_id: gen firm_n_l = _N\nkeep if firm_n_l >= 5\n\n* Run regression with workplace fixed effects\nreghdfe ln_labor, absorb(labor_fe = $workplace_id i.age_cat i.$male i.$jew i.$ba)\n\n* Save workplace premiums (deduplicate at firm level)\nkeep $workplace_id labor_fe\nduplicates drop $workplace_id, force\nrename labor_fe labor_premium"
     },
     {
@@ -657,7 +862,14 @@
       "source": "computed",
       "notebook": "simple_analysis.txt",
       "logic": "Population: ages 20–67 with positive capital income, at firms with ≥5 workers. Compute ln(capital_income_5_s4), define age categories (20–35, 36–50, 51–67), then run reghdfe ln_capital, absorb(capital_fe = firm_id, i.age_cat, i.male, i.jew, i.ba). The saved firm fixed effect is the capital premium, deduplicated at the firm level.",
-      "inputs": ["capital_income_5_s4", "firm_id", "age", "male", "jew", "ba"],
+      "inputs": [
+        "capital_income_5_s4",
+        "firm_id",
+        "age",
+        "male",
+        "jew",
+        "ba"
+      ],
       "code": "* Create log capital income (skip negatives/zeros)\ngen ln_capital = ln($capital_income) if $capital_income > 0\n\n* Filter to working age (20-67)\nkeep if $age >= 20 & $age <= 67\n\n* Create age categories\ngen age_cat = .\nreplace age_cat = 1 if $age >= 20 & $age <= 35\nreplace age_cat = 2 if $age >= 36 & $age <= 50\nreplace age_cat = 3 if $age >= 51 & $age <= 67\n\n* Keep only observations with valid capital income\nkeep if !missing(ln_capital)\n\n* Keep firms with >= 5 workers\nbys firm_id: gen firm_n_c = _N\nkeep if firm_n_c >= 5\n\n* Run regression with workplace fixed effects\nreghdfe ln_capital, absorb(capital_fe = $workplace_id i.age_cat i.$male i.$jew i.$ba)\n\n* Save workplace premiums (deduplicate at firm level)\nkeep $workplace_id capital_fe\nduplicates drop $workplace_id, force\nrename capital_fe capital_premium"
     }
   ],
@@ -669,7 +881,11 @@
       "source": "tbl_hahnsotpratt87_21",
       "notebook": "large proprietors – first definition.ipynb",
       "logic": "For each person-year (2006–2021), flag has_capital_income = 1 if HahnasaHonitAheret > 0 or HahnasaHonit > 0 or HahnasaLeLoYilshit > 0 (NaN filled with 0). Count flagged years per person. Set large_proprietor_first_def = 1 if count > 5. Once classified, the label applies to all years.",
-      "inputs": ["HahnasaHonitAheret", "HahnasaHonit", "HahnasaLeLoYilshit"],
+      "inputs": [
+        "HahnasaHonitAheret",
+        "HahnasaHonit",
+        "HahnasaLeLoYilshit"
+      ],
       "code": "tbl_hahnsotpratt87_21['has_capital_income'] = (\n    (tbl_hahnsotpratt87_21['HahnasaHonitAheret'].fillna(0) > 0) |\n    (tbl_hahnsotpratt87_21['HahnasaHonit'].fillna(0) > 0) |\n    (tbl_hahnsotpratt87_21['HahnasaLeLoYilshit'].fillna(0) > 0)\n).astype(int)\n\ndata_filtered = tbl_hahnsotpratt87_21[\n    (tbl_hahnsotpratt87_21['shana'] >= 2006) &\n    (tbl_hahnsotpratt87_21['shana'] <= 2021) &\n    (tbl_hahnsotpratt87_21['MisparTeudatZehut_fic'].notna())\n].copy()\n\nyears_with_capital = data_filtered.groupby(\n    'MisparTeudatZehut_fic'\n)['has_capital_income'].sum().reset_index()\nyears_with_capital.columns = [\n    'MisparTeudatZehut_fic',\n    'years_with_capital_income'\n]\n\nlarge_proprietors_ids = years_with_capital[\n    years_with_capital['years_with_capital_income'] > 5\n]['MisparTeudatZehut_fic'].tolist()\n\nsocial_class_df['large_proprietor_first_def'] = (\n    social_class_df['MisparTeudatZehut_fic']\n    .isin(large_proprietors_ids).astype(int)\n)"
     },
     {
@@ -679,7 +895,9 @@
       "source": "tbl_source",
       "notebook": "Small proprietors.ipynb",
       "logic": "For each person-year (2006–2021), flag has_small_business_form = 1 if SugTikShatMas is one of [10, 20, 40, 41, 42, 43, 52, 53, 91, 96, 98]. Count flagged years per person. Set small_proprietor = 1 if count > 5. Once classified, the label applies to all years.",
-      "inputs": ["SugTikShatMas"],
+      "inputs": [
+        "SugTikShatMas"
+      ],
       "code": "small_business_codes = [\n    10, 20, 40, 41, 42, 43, 52, 53, 91, 96, 98\n]\n\ndata_filtered = tbl_source[\n    (tbl_source['shana'] >= 2006) &\n    (tbl_source['shana'] <= 2021) &\n    (tbl_source['MisparTeudatZehut_fic'].notna())\n].copy()\n\ndata_no_dups = data_filtered.drop_duplicates(\n    subset=['MisparTeudatZehut_fic', 'shana'],\n    keep='first'\n).copy()\n\ndata_no_dups['has_small_business_form'] = (\n    data_no_dups['SugTikShatMas']\n    .isin(small_business_codes).astype(int)\n)\n\nyears_with_forms = data_no_dups.groupby(\n    'MisparTeudatZehut_fic'\n)['has_small_business_form'].sum().reset_index()\nyears_with_forms.columns = [\n    'MisparTeudatZehut_fic',\n    'years_with_small_business_forms'\n]\n\nsmall_proprietors_ids = years_with_forms[\n    years_with_forms['years_with_small_business_forms'] > 5\n]['MisparTeudatZehut_fic'].tolist()\n\nsmall_proprietors_df['small_proprietor'] = (\n    small_proprietors_df['MisparTeudatZehut_fic']\n    .isin(small_proprietors_ids).astype(int)\n)"
     },
     {
@@ -689,7 +907,10 @@
       "source": "tbl_hahnsotpratt87_21",
       "notebook": "independen producsrs.ipynb",
       "logic": "For each person-year (1999–2021), flag is_independent_producer = 1 if HahnasaIskit is not missing AND HahnasaSaher is missing. Count flagged years per person. Set independent_producer = 1 if count > 5. Once classified, the label applies to all years.",
-      "inputs": ["HahnasaIskit", "HahnasaSaher"],
+      "inputs": [
+        "HahnasaIskit",
+        "HahnasaSaher"
+      ],
       "code": "data_filtered = tbl_hahnsotpratt87_21[\n    (tbl_hahnsotpratt87_21['shana'] >= 1999) &\n    (tbl_hahnsotpratt87_21['shana'] <= 2021) &\n    (tbl_hahnsotpratt87_21['MisparTeudatZehut_fic'].notna())\n].copy()\n\ndata_no_dups = data_filtered.drop_duplicates(\n    subset=['MisparTeudatZehut_fic', 'shana'],\n    keep='first'\n).copy()\n\ndata_no_dups['is_independent_producer'] = (\n    (data_no_dups['HahnasaIskit'].notna()) &\n    (data_no_dups['HahnasaSaher'].isna())\n).astype(int)\n\nyears_as_independent = data_no_dups.groupby(\n    'MisparTeudatZehut_fic'\n)['is_independent_producer'].sum().reset_index()\nyears_as_independent.columns = [\n    'MisparTeudatZehut_fic',\n    'years_as_independent_producer'\n]\n\nindependent_producers_ids = years_as_independent[\n    years_as_independent['years_as_independent_producer'] > 5\n]['MisparTeudatZehut_fic'].tolist()\n\nindependent_producers_df['independent_producer'] = (\n    independent_producers_df['MisparTeudatZehut_fic']\n    .isin(independent_producers_ids).astype(int)\n)"
     },
     {
@@ -699,7 +920,10 @@
       "source": "tbl_hahnsotpratt87_21, tbl_mh2021",
       "notebook": "independen producsrs.ipynb",
       "logic": "Sub-class of independent_producer. Set to 1 if independent_producer == 1 and ba == 1 (completed higher education). Education data merged from tbl_mh2021.",
-      "inputs": ["independent_producer", "ba"],
+      "inputs": [
+        "independent_producer",
+        "ba"
+      ],
       "code": "education_data = tbl_mh2021[\n    ['MisparTeudatZehut_fic', 'ba']\n].copy()\neducation_data = education_data[\n    education_data['MisparTeudatZehut_fic'].notna()\n]\neducation_data = education_data.drop_duplicates(\n    subset=['MisparTeudatZehut_fic'], keep='first'\n)\n\nindependent_producers_df = (\n    independent_producers_df.merge(\n        education_data,\n        on='MisparTeudatZehut_fic',\n        how='left'\n    )\n)\n\nindependent_producers_df['formal_independent_producer'] = (\n    (independent_producers_df['independent_producer'] == 1) &\n    (independent_producers_df['ba'] == 1)\n).astype(int)"
     },
     {
@@ -709,7 +933,10 @@
       "source": "tbl_hahnsotpratt87_21, tbl_mh2021",
       "notebook": "independen producsrs.ipynb",
       "logic": "Sub-class of independent_producer. Set to 1 if independent_producer == 1 and ba == 0 (no higher education). Education data merged from tbl_mh2021.",
-      "inputs": ["independent_producer", "ba"],
+      "inputs": [
+        "independent_producer",
+        "ba"
+      ],
       "code": "independent_producers_df['informal_independent_producer'] = (\n    (independent_producers_df['independent_producer'] == 1) &\n    (independent_producers_df['ba'] == 0)\n).astype(int)"
     },
     {
@@ -719,7 +946,10 @@
       "source": "tbl_hahnsotpratt87_21",
       "notebook": "Wage and salary workers and Independent producers.ipynb",
       "logic": "For each person-year (1999–2021), flag has_mixed_income = 1 if both HahnasaIskit and HahnasaSaher are not missing. Count flagged years per person. Set wage_and_independent_producer = 1 if count > 5. Once classified, the label applies to all years.",
-      "inputs": ["HahnasaIskit", "HahnasaSaher"],
+      "inputs": [
+        "HahnasaIskit",
+        "HahnasaSaher"
+      ],
       "code": "data_filtered = tbl_hahnsotpratt87_21[\n    (tbl_hahnsotpratt87_21['shana'] >= 1999) &\n    (tbl_hahnsotpratt87_21['shana'] <= 2021) &\n    (tbl_hahnsotpratt87_21['MisparTeudatZehut_fic'].notna())\n].copy()\n\ndata_no_dups = data_filtered.drop_duplicates(\n    subset=['MisparTeudatZehut_fic', 'shana'],\n    keep='first'\n).copy()\n\ndata_no_dups['has_mixed_income'] = (\n    (data_no_dups['HahnasaIskit'].notna()) &\n    (data_no_dups['HahnasaSaher'].notna())\n).astype(int)\n\nyears_with_mixed = data_no_dups.groupby(\n    'MisparTeudatZehut_fic'\n)['has_mixed_income'].sum().reset_index()\nyears_with_mixed.columns = [\n    'MisparTeudatZehut_fic',\n    'years_with_mixed_income'\n]\n\nmixed_workers_ids = years_with_mixed[\n    years_with_mixed['years_with_mixed_income'] > 5\n]['MisparTeudatZehut_fic'].tolist()\n\nmixed_workers_df['wage_and_independent_producer'] = (\n    mixed_workers_df['MisparTeudatZehut_fic']\n    .isin(mixed_workers_ids).astype(int)\n)"
     },
     {
@@ -729,7 +959,13 @@
       "source": "tbl_hahnsotpratt87_21",
       "notebook": "Wage_and_salary_workers.ipynb",
       "logic": "Set to 1 if HahnasaSaher is not missing and the individual is not classified as large_proprietor_first_def, small_proprietor, independent_producer, or wage_and_independent_producer. Period: 2006–2021.",
-      "inputs": ["HahnasaSaher", "large_proprietor_first_def", "small_proprietor", "independent_producer", "wage_and_independent_producer"],
+      "inputs": [
+        "HahnasaSaher",
+        "large_proprietor_first_def",
+        "small_proprietor",
+        "independent_producer",
+        "wage_and_independent_producer"
+      ],
       "code": "wage_df['wage_and_salary_worker'] = (\n    (wage_df['has_wage_income'] == 1) &\n    (wage_df['large_proprietor_first_def'] != 1) &\n    (wage_df['small_proprietor'] != 1) &\n    (wage_df['independent_producer'] != 1) &\n    (wage_df['wage_and_independent_producer'] != 1)\n).astype(int)"
     },
     {
@@ -739,7 +975,10 @@
       "source": "tbl_source, tbl_misrot27_21",
       "notebook": "Wage_and_salary_workers.ipynb",
       "logic": "Sub-class of wage_and_salary_worker. Manager has priority over all other sub-classes. Set to 1 if the individual appears in tbl_source with SugTikShatMas == 30 AND appears in tbl_misrot in the same year. Period: 2006–2021.",
-      "inputs": ["wage_and_salary_worker", "SugTikShatMas"],
+      "inputs": [
+        "wage_and_salary_worker",
+        "SugTikShatMas"
+      ],
       "code": "source_managers = tbl_source[\n    (tbl_source['MisparTeudatZehut_fic'].notna()) &\n    (tbl_source['SugTikShatMas'] == 30)\n][['MisparTeudatZehut_fic', 'shana']].drop_duplicates()\nsource_managers['in_source_as_manager'] = 1\n\nwage_sub = wage_sub.merge(\n    source_managers,\n    on=['MisparTeudatZehut_fic', 'shana'],\n    how='left'\n)\nwage_sub['in_source_as_manager'] = (\n    wage_sub['in_source_as_manager'].fillna(0).astype(int)\n)\n\nwage_sub['manager'] = (\n    (wage_sub['in_source_as_manager'] == 1) &\n    (wage_sub['in_misrot'] == 1)\n).astype(int)"
     },
     {
@@ -749,7 +988,14 @@
       "source": "tbl_misrot27_21",
       "notebook": "Wage_and_salary_workers.ipynb",
       "logic": "Sub-class of wage_and_salary_worker. Not a manager. Set to 1 if prat_sug_misra == 3 (daily job), or sug_oved in [2, 3] (before 2019), or worked_month <= 5 and tenure >= 2. Period: 2006–2021.",
-      "inputs": ["wage_and_salary_worker", "manager", "prat_sug_misra", "sug_oved", "worked_month", "tenure"],
+      "inputs": [
+        "wage_and_salary_worker",
+        "manager",
+        "prat_sug_misra",
+        "sug_oved",
+        "worked_month",
+        "tenure"
+      ],
       "code": "cond_job_type = wage_sub['prat_sug_misra'].isin([3])\n\ncond_worker_type = (\n    (wage_sub['shana'] < 2019) &\n    (wage_sub['sug_oved'].isin([2, 3]))\n)\n\ncond_low_months_high_tenure = (\n    (wage_sub['worked_month'] <= 5) &\n    (wage_sub['tenure'] >= 2)\n)\n\nwage_sub['gig'] = (\n    (wage_sub['manager'] != 1) &\n    (cond_job_type | cond_worker_type\n     | cond_low_months_high_tenure)\n).astype(int)"
     },
     {
@@ -759,7 +1005,15 @@
       "source": "tbl_misrot27_21",
       "notebook": "Wage_and_salary_workers.ipynb",
       "logic": "Sub-class of wage_and_salary_worker. Not a manager or gig. Set to 1 if prat_sug_misra == 1 (sole job) and sug_oved == 1 (monthly worker) and worked_month >= 10 and firm_size >= 20. Period: 2006–2021.",
-      "inputs": ["wage_and_salary_worker", "manager", "gig", "prat_sug_misra", "sug_oved", "worked_month", "firm_size"],
+      "inputs": [
+        "wage_and_salary_worker",
+        "manager",
+        "gig",
+        "prat_sug_misra",
+        "sug_oved",
+        "worked_month",
+        "firm_size"
+      ],
       "code": "wage_sub['standard'] = (\n    (wage_sub['manager'] != 1) &\n    (wage_sub['gig'] != 1) &\n    (wage_sub['prat_sug_misra'] == 1) &\n    (wage_sub['sug_oved'] == 1) &\n    (wage_sub['worked_month'] >= 10) &\n    (wage_sub['firm_size'] >= 20)\n).astype(int)"
     },
     {
@@ -769,7 +1023,12 @@
       "source": "tbl_misrot27_21",
       "notebook": "Wage_and_salary_workers.ipynb",
       "logic": "Sub-class of wage_and_salary_worker. Set to 1 if wage_and_salary_worker == 1 and manager != 1 and gig != 1 and standard != 1. Period: 2006–2021.",
-      "inputs": ["wage_and_salary_worker", "manager", "gig", "standard"],
+      "inputs": [
+        "wage_and_salary_worker",
+        "manager",
+        "gig",
+        "standard"
+      ],
       "code": "wage_sub['gig_standard_mix'] = (\n    (wage_sub['manager'] != 1) &\n    (wage_sub['gig'] != 1) &\n    (wage_sub['standard'] != 1)\n).astype(int)"
     },
     {
@@ -779,7 +1038,13 @@
       "source": "computed",
       "notebook": "Merge_production_classes.ipynb",
       "logic": "Not a separately computed indicator. In the merge, every person-year starts as 'Out of earned income population' and is overwritten if any class indicator is 1. Those with no indicator remain in this residual category.",
-      "inputs": ["large_proprietor_first_def", "small_proprietor", "independent_producer", "wage_and_independent_producer", "wage_and_salary_worker"],
+      "inputs": [
+        "large_proprietor_first_def",
+        "small_proprietor",
+        "independent_producer",
+        "wage_and_independent_producer",
+        "wage_and_salary_worker"
+      ],
       "code": "# Default — everyone starts here\nmerged['production_class'] = (\n    'Out of earned income population'\n)\n# Then higher-priority classes overwrite\n# in reverse priority order (see production_class)"
     },
     {
@@ -789,7 +1054,19 @@
       "source": "computed",
       "notebook": "Merge_production_classes.ipynb",
       "logic": "Priority-based assignment (highest wins): 1) Large Proprietor, 2) Small Proprietor, 3) Independent Producer – Formal / Informal / Unknown Education, 4) Wage & Independent Producer, 5) Wage Worker – Manager / Gig / Standard / Gig-Standard Mix, 6) Out of earned income population. Applied in reverse order so higher priority overwrites lower.",
-      "inputs": ["large_proprietor_first_def", "small_proprietor", "independent_producer", "formal_independent_producer", "informal_independent_producer", "wage_and_independent_producer", "wage_and_salary_worker", "manager", "gig", "standard", "gig_standard_mix"],
+      "inputs": [
+        "large_proprietor_first_def",
+        "small_proprietor",
+        "independent_producer",
+        "formal_independent_producer",
+        "informal_independent_producer",
+        "wage_and_independent_producer",
+        "wage_and_salary_worker",
+        "manager",
+        "gig",
+        "standard",
+        "gig_standard_mix"
+      ],
       "code": "merged['production_class'] = 'Out of earned income population'\n\n# 5d  Gig/Standard Mix\nmask = (merged['wage_and_salary_worker'] == 1) & (merged['gig_standard_mix'] == 1)\nmerged.loc[mask, 'production_class'] = 'Wage Worker – Gig/Standard Mix'\n\n# 5c  Standard\nmask = (merged['wage_and_salary_worker'] == 1) & (merged['standard'] == 1)\nmerged.loc[mask, 'production_class'] = 'Wage Worker – Standard'\n\n# 5b  Gig\nmask = (merged['wage_and_salary_worker'] == 1) & (merged['gig'] == 1)\nmerged.loc[mask, 'production_class'] = 'Wage Worker – Gig'\n\n# 5a  Manager\nmask = (merged['wage_and_salary_worker'] == 1) & (merged['manager'] == 1)\nmerged.loc[mask, 'production_class'] = 'Wage Worker – Manager'\n\n# 4   Wage & Independent Producer\nmask = merged['wage_and_independent_producer'] == 1\nmerged.loc[mask, 'production_class'] = 'Wage & Independent Producer'\n\n# 3c  Independent Producer – Unknown Education\nmask = (\n    (merged['independent_producer'] == 1) &\n    (merged['formal_independent_producer'] == 0) &\n    (merged['informal_independent_producer'] == 0)\n)\nmerged.loc[mask, 'production_class'] = 'Independent Producer – Unknown Education'\n\n# 3b  Informal\nmask = merged['informal_independent_producer'] == 1\nmerged.loc[mask, 'production_class'] = 'Independent Producer – Informal'\n\n# 3a  Formal\nmask = merged['formal_independent_producer'] == 1\nmerged.loc[mask, 'production_class'] = 'Independent Producer – Formal'\n\n# 2   Small Proprietor\nmask = merged['small_proprietor'] == 1\nmerged.loc[mask, 'production_class'] = 'Small Proprietor'\n\n# 1   Large Proprietor\nmask = merged['large_proprietor_first_def'] == 1\nmerged.loc[mask, 'production_class'] = 'Large Proprietor'"
     },
     {
@@ -799,7 +1076,9 @@
       "source": "computed",
       "notebook": "Merge_production_classes.ipynb",
       "logic": "Maps production_class text to a numeric code: 1 = Large Proprietor, 2 = Small Proprietor, 3 = Independent Producer – Formal, 4 = Independent Producer – Informal, 5 = Independent Producer – Unknown Education, 6 = Wage & Independent Producer, 7 = Wage Worker – Manager, 8 = Wage Worker – Gig, 9 = Wage Worker – Standard, 10 = Wage Worker – Gig/Standard Mix, 11 = Out of earned income population.",
-      "inputs": ["production_class"],
+      "inputs": [
+        "production_class"
+      ],
       "code": "class_codes = {\n    'Large Proprietor':                        1,\n    'Small Proprietor':                        2,\n    'Independent Producer – Formal':           3,\n    'Independent Producer – Informal':         4,\n    'Independent Producer – Unknown Education': 5,\n    'Wage & Independent Producer':             6,\n    'Wage Worker – Manager':                   7,\n    'Wage Worker – Gig':                       8,\n    'Wage Worker – Standard':                  9,\n    'Wage Worker – Gig/Standard Mix':         10,\n    'Out of earned income population':        11\n}\n\nmerged['production_class_code'] = (\n    merged['production_class'].map(class_codes)\n)"
     },
     {
@@ -809,7 +1088,9 @@
       "source": "computed",
       "notebook": "Merge_production_classes.ipynb",
       "logic": "Maps production_class to a broader grouping: Independent Producer sub-classes → 'Independent Producer'; Wage Worker sub-classes → 'Wage & Salary Worker'; all others unchanged.",
-      "inputs": ["production_class"],
+      "inputs": [
+        "production_class"
+      ],
       "code": "broad_map = {\n    'Large Proprietor':                        'Large Proprietor',\n    'Small Proprietor':                        'Small Proprietor',\n    'Independent Producer – Formal':           'Independent Producer',\n    'Independent Producer – Informal':         'Independent Producer',\n    'Independent Producer – Unknown Education': 'Independent Producer',\n    'Wage & Independent Producer':             'Wage & Independent Producer',\n    'Wage Worker – Manager':                   'Wage & Salary Worker',\n    'Wage Worker – Gig':                       'Wage & Salary Worker',\n    'Wage Worker – Standard':                  'Wage & Salary Worker',\n    'Wage Worker – Gig/Standard Mix':          'Wage & Salary Worker',\n    'Out of earned income population':         'Out of earned income population'\n}\n\nmerged['production_class_broad'] = (\n    merged['production_class'].map(broad_map)\n)"
     }
   ],
@@ -821,7 +1102,9 @@
       "source": "tbl_x2022",
       "notebook": "Tbl_x2022_compute_social_groups_var_fixed_CBS_safe.ipynb",
       "logic": "Renamed from original 'min' to 'min_old', then copied back. Value 2 (female) replaced with 0.",
-      "inputs": ["min_old"],
+      "inputs": [
+        "min_old"
+      ],
       "code": "Tbl_x2022.rename(columns={\"min\": \"min_old\"}, inplace=True)\n\nTbl_x2022['min'] = Tbl_x2022[\"min_old\"]\n\nTbl_x2022['min'] = Tbl_x2022['min'].replace({2: 0})"
     },
     {
@@ -831,7 +1114,9 @@
       "source": "tbl_x2022",
       "notebook": "Tbl_x2022_compute_social_groups_var_fixed_CBS_safe.ipynb",
       "logic": "Copied from KvutzaUchlusiya. Value 3 replaced with 1 (Jews and others), value 2 replaced with 0 (Arabs).",
-      "inputs": ["KvutzaUchlusiya"],
+      "inputs": [
+        "KvutzaUchlusiya"
+      ],
       "code": "Tbl_x2022['jew'] = Tbl_x2022['KvutzaUchlusiya']\n\nTbl_x2022['jew'] = Tbl_x2022['jew'].replace({3: 1, 2: 0})"
     },
     {
@@ -841,7 +1126,10 @@
       "source": "tbl_x2022",
       "notebook": "Tbl_x2022_compute_social_groups_var_fixed_CBS_safe.ipynb",
       "logic": "Computed via np.select: 1 = male Jews (min==1 & jew==1), 2 = female Jews (min==0 & jew==1), 3 = male Arabs (min==1 & jew==0), 4 = female Arabs (min==0 & jew==0). Default NaN.",
-      "inputs": ["min", "jew"],
+      "inputs": [
+        "min",
+        "jew"
+      ],
       "code": "conditions = [\n    (Tbl_x2022['min'] == 1) & (Tbl_x2022['jew'] == 1),\n    (Tbl_x2022['min'] == 0) & (Tbl_x2022['jew'] == 1),\n    (Tbl_x2022['min'] == 1) & (Tbl_x2022['jew'] == 0),\n    (Tbl_x2022['min'] == 0) & (Tbl_x2022['jew'] == 0)\n]\n\nvalues = [1, 2, 3, 4]\n\nTbl_x2022['gender_nationlity'] = np.select(conditions, values, default=np.NaN)"
     },
     {
@@ -851,7 +1139,15 @@
       "source": "tbl_x2022",
       "notebook": "Tbl_x2022_compute_social_groups_var_fixed_CBS_safe.ipynb",
       "logic": "Computed via np.select with 5 conditions: (1) 1st gen — born outside Israel (EretzLeida in Africa/America/Asia/Europe/Oceania); (2) 2nd gen — born in Israel, both parents born outside Israel; (2.5) — born in Israel, one parent born in Israel, other born abroad; (3) 3rd gen — self and both parents born in Israel, at least one grandparent not born in Israel (all grandparent fields non-null); (4) 4th gen — self, parents, and all grandparents born in Israel. Default NaN (~16% missing, concentrated among Arabs).",
-      "inputs": ["EretzLeida", "EretzLeidaAv", "EretzLeidaEm", "EretzLeidaAvAV", "EretzLeidaAvEm", "EretzLeidaEmAV", "EretzLeidaEmEm"],
+      "inputs": [
+        "EretzLeida",
+        "EretzLeidaAv",
+        "EretzLeidaEm",
+        "EretzLeidaAvAV",
+        "EretzLeidaAvEm",
+        "EretzLeidaEmAV",
+        "EretzLeidaEmEm"
+      ],
       "code": "conditions = [\n    # First generation: born outside of Israel\n    (Tbl_x2022['EretzLeida'].isin(['Africa', 'America', 'Asia', 'Europe', 'Oceania'])),\n\n    # Second Generation: born in Israel, parents born outside Israel\n    ((Tbl_x2022['EretzLeida'] == 'Israel') &\n    (Tbl_x2022[['EretzLeidaAv', 'EretzLeidaEm']].isin(['Africa', 'America', 'Asia', 'Europe']).all(axis=1))),\n\n    # Generation 2.5: one parent born in Israel, other born outside\n    ((Tbl_x2022['EretzLeida'] == 'Israel') &\n    (((Tbl_x2022['EretzLeidaAv'] == 'Israel') & (Tbl_x2022['EretzLeidaEm'].isin(['Africa', 'America', 'Asia', 'Europe']))) |\n    ((Tbl_x2022['EretzLeidaEm'] == 'Israel') & (Tbl_x2022['EretzLeidaAv'].isin(['Africa', 'America', 'Asia', 'Europe']))))),\n\n    # Third generation: both parents born in Israel, not all grandparents\n    ((Tbl_x2022['EretzLeida'] == 'Israel') &\n    (Tbl_x2022[['EretzLeidaAv', 'EretzLeidaEm']].isin(['Israel']).all(axis=1)) &\n    (Tbl_x2022[['EretzLeidaAvAV', 'EretzLeidaAvEm', 'EretzLeidaEmAV', 'EretzLeidaEmEm']].notna().all(axis=1)) &\n    ((~Tbl_x2022[['EretzLeidaAvAV', 'EretzLeidaAvEm', 'EretzLeidaEmAV', 'EretzLeidaEmEm']].isin(['Israel']).all(axis=1)))),\n\n    # Fourth generation: all born in Israel\n    ((Tbl_x2022['EretzLeida'] == 'Israel') &\n    ((Tbl_x2022[['EretzLeidaAv', 'EretzLeidaEm', 'EretzLeidaAvAV', 'EretzLeidaEmAV', 'EretzLeidaAvEm', 'EretzLeidaEmEm']].isin(['Israel']).all(axis=1))))\n]\n\nvalues = [1, 2, 2.5, 3, 4]\n\nTbl_x2022['generation'] = np.select(conditions, values, default=np.nan)"
     },
     {
@@ -861,7 +1157,10 @@
       "source": "tbl_x2022",
       "notebook": "Tbl_x2022_compute_social_groups_var_fixed_CBS_safe.ipynb",
       "logic": "1 if generation==1 and EretzLeida in [Africa, Asia], else 0.",
-      "inputs": ["generation", "EretzLeida"],
+      "inputs": [
+        "generation",
+        "EretzLeida"
+      ],
       "code": "Tbl_x2022['firstgmiz'] = (\n    (Tbl_x2022['generation'] == 1) &\n    (Tbl_x2022['EretzLeida'].isin(['Africa', 'Asia']))\n).astype(int)"
     },
     {
@@ -871,7 +1170,10 @@
       "source": "tbl_x2022",
       "notebook": "Tbl_x2022_compute_social_groups_var_fixed_CBS_safe.ipynb",
       "logic": "1 if generation==1 and EretzLeida in [America, Europe, Oceania], else 0.",
-      "inputs": ["generation", "EretzLeida"],
+      "inputs": [
+        "generation",
+        "EretzLeida"
+      ],
       "code": "Tbl_x2022['firstgash'] = (\n    (Tbl_x2022['generation'] == 1) &\n    (Tbl_x2022['EretzLeida'].isin(['America', 'Europe', 'Oceania']))\n).astype(int)"
     },
     {
@@ -881,7 +1183,11 @@
       "source": "tbl_x2022",
       "notebook": "Tbl_x2022_compute_social_groups_var_fixed_CBS_safe.ipynb",
       "logic": "1 if generation==2 and both parents born in Africa/Asia, else 0.",
-      "inputs": ["generation", "EretzLeidaAv", "EretzLeidaEm"],
+      "inputs": [
+        "generation",
+        "EretzLeidaAv",
+        "EretzLeidaEm"
+      ],
       "code": "second_generation = (Tbl_x2022['generation'] == 2)\nmizrahi_father = (Tbl_x2022['EretzLeidaAv'].isin(['Africa', 'Asia']))\nmizrahi_mother = (Tbl_x2022['EretzLeidaEm'].isin(['Africa', 'Asia']))\n\nTbl_x2022['secondgmiz'] = (\n    second_generation &\n    mizrahi_father &\n    mizrahi_mother\n).astype(int)"
     },
     {
@@ -891,7 +1197,11 @@
       "source": "tbl_x2022",
       "notebook": "Tbl_x2022_compute_social_groups_var_fixed_CBS_safe.ipynb",
       "logic": "1 if generation==2 and both parents born in America/Europe, else 0.",
-      "inputs": ["generation", "EretzLeidaAv", "EretzLeidaEm"],
+      "inputs": [
+        "generation",
+        "EretzLeidaAv",
+        "EretzLeidaEm"
+      ],
       "code": "ahkenazi_father = (Tbl_x2022['EretzLeidaAv'].isin(['America', 'Europe']))\nahkenazi_mother = (Tbl_x2022['EretzLeidaEm'].isin(['America', 'Europe']))\n\nTbl_x2022['secondgash'] = (\n    second_generation &\n    ahkenazi_father &\n    ahkenazi_mother\n).astype(int)"
     },
     {
@@ -901,7 +1211,11 @@
       "source": "tbl_x2022",
       "notebook": "Tbl_x2022_compute_social_groups_var_fixed_CBS_safe.ipynb",
       "logic": "1 if generation==2 and one parent from Africa/Asia and the other from America/Europe, else 0.",
-      "inputs": ["generation", "EretzLeidaAv", "EretzLeidaEm"],
+      "inputs": [
+        "generation",
+        "EretzLeidaAv",
+        "EretzLeidaEm"
+      ],
       "code": "ahkenazi_father_mizrahi_mother = (\n    (Tbl_x2022['EretzLeidaAv'].isin(['America', 'Europe'])) &\n    (Tbl_x2022['EretzLeidaEm'].isin(['Africa', 'Asia']))\n)\n\nmizrahi_father_ahkenazi_mother = (\n    (Tbl_x2022['EretzLeidaAv'].isin(['Africa', 'Asia'])) &\n    (Tbl_x2022['EretzLeidaEm'].isin(['America', 'Europe']))\n)\n\nTbl_x2022['secondgmix'] = (\n    second_generation &\n    (ahkenazi_father_mizrahi_mother | mizrahi_father_ahkenazi_mother)\n).astype(int)"
     },
     {
@@ -911,7 +1225,15 @@
       "source": "tbl_x2022",
       "notebook": "Tbl_x2022_compute_social_groups_var_fixed_CBS_safe.ipynb",
       "logic": "1 if generation==2.5 and the foreign-born parent is from Africa/Asia, and the Israeli-born parent's parents are also Mizrahi or Israeli-born. NaN otherwise.",
-      "inputs": ["generation", "EretzLeidaAv", "EretzLeidaEm", "EretzLeidaAvAV", "EretzLeidaAvEm", "EretzLeidaEmAV", "EretzLeidaEmEm"],
+      "inputs": [
+        "generation",
+        "EretzLeidaAv",
+        "EretzLeidaEm",
+        "EretzLeidaAvAV",
+        "EretzLeidaAvEm",
+        "EretzLeidaEmAV",
+        "EretzLeidaEmEm"
+      ],
       "code": "second_and_a_half_generation = (Tbl_x2022['generation'] == 2.5)\n\nmizrahi_father = (Tbl_x2022['EretzLeidaAv'].isin(['Africa', 'Asia']))\nisraeli_born_mother = (Tbl_x2022['EretzLeidaEm'] == 'Israel')\nmother_side_at_least_one_grandparent_israli_born = (\n    Tbl_x2022[['EretzLeidaAvEm', 'EretzLeidaEmEm']].isin(['Israel']).any(axis=1)\n)\nmother_side_all_grandparents_mizrahi = (\n    Tbl_x2022[['EretzLeidaAvEm', 'EretzLeidaEmEm']].isin(['Africa', 'Asia']).all(axis=1)\n)\n\nmizrahi_mother = (Tbl_x2022['EretzLeidaEm'].isin(['Africa', 'Asia']))\nisraeli_born_father = (Tbl_x2022['EretzLeidaAv'] == 'Israel')\nfather_side_at_least_one_grandparent_israli_born = (\n    Tbl_x2022[['EretzLeidaAvAV', 'EretzLeidaEmAV']].isin(['Israel']).any(axis=1)\n)\nfather_side_all_grandparents_mizrahi = (\n    Tbl_x2022[['EretzLeidaAvAV', 'EretzLeidaEmAV']].isin(['Africa', 'Asia']).all(axis=1)\n)\n\nmizrahi_father_israeli_born_mother = (mizrahi_father & israeli_born_mother)\nmother_side_ok = (mother_side_all_grandparents_mizrahi | mother_side_at_least_one_grandparent_israli_born)\n\nmizrahi_mother_israeli_born_father = (mizrahi_mother & israeli_born_father)\nfather_side_ok = (father_side_all_grandparents_mizrahi | father_side_at_least_one_grandparent_israli_born)\n\nconditions_mizrahi = (\n    second_and_a_half_generation &\n    (\n        (mizrahi_father_israeli_born_mother & mother_side_ok) |\n        (mizrahi_mother_israeli_born_father & father_side_ok)\n    )\n)\n\nTbl_x2022['secondhgmiz'] = np.where(conditions_mizrahi, 1, np.nan)"
     },
     {
@@ -921,8 +1243,16 @@
       "source": "tbl_x2022",
       "notebook": "Tbl_x2022_compute_social_groups_var_fixed_CBS_safe.ipynb",
       "logic": "1 if generation==2.5 and the foreign-born parent is from Europe/America, and the Israeli-born parent's parents are also Ashkenazi or Israeli-born. NaN otherwise.",
-      "inputs": ["generation", "EretzLeidaAv", "EretzLeidaEm", "EretzLeidaAvAV", "EretzLeidaAvEm", "EretzLeidaEmAV", "EretzLeidaEmEm"],
-      "code": "ashkenazi_father = (Tbl_x2022['EretzLeidaAv'].isin(['Europe', 'America']))\nisraeli_born_mother = (Tbl_x2022['EretzLeidaEm'] == 'Israel')\nmother_side_all_grandparents_ashkenazi = (\n    Tbl_x2022[['EretzLeidaAvEm', 'EretzLeidaEmEm']].isin(['Europe', 'America']).all(axis=1)\n)\nmother_side_at_least_one_grandparent_israli_born = (\n    Tbl_x2022[['EretzLeidaAvEm', 'EretzLeidaEmEm']].isin(['Israel']).any(axis=1)\n)\n\nashkenazi_mother = (Tbl_x2022['EretzLeidaEm'].isin(['Africa', 'Asia']))\nisraeli_born_father = (Tbl_x2022['EretzLeidaAv'] == 'Israel')\nfather_side_all_grandparents_ashkenazi = (\n    Tbl_x2022[['EretzLeidaAvAV', 'EretzLeidaEmAV']].isin(['Europe', 'America']).all(axis=1)\n)\nfather_side_at_least_one_grandparent_israli_born = (\n    Tbl_x2022[['EretzLeidaAvAV', 'EretzLeidaEmAV']].isin(['Israel']).any(axis=1)\n)\n\nconditions_ashkenazi = (\n    second_and_a_half_generation &\n    (\n        (ashkenazi_father & israeli_born_mother &\n         (mother_side_all_grandparents_ashkenazi | mother_side_at_least_one_grandparent_israli_born)) |\n        (ashkenazi_mother & israeli_born_father &\n         (father_side_all_grandparents_ashkenazi | father_side_at_least_one_grandparent_israli_born))\n    )\n)\n\nTbl_x2022['secondhgash'] = np.where(conditions_ashkenazi, 1, np.nan)"
+      "inputs": [
+        "generation",
+        "EretzLeidaAv",
+        "EretzLeidaEm",
+        "EretzLeidaAvAV",
+        "EretzLeidaAvEm",
+        "EretzLeidaEmAV",
+        "EretzLeidaEmEm"
+      ],
+      "code": "ashkenazi_father = (Tbl_x2022['EretzLeidaAv'].isin(['Europe', 'America']))\nisraeli_born_mother = (Tbl_x2022['EretzLeidaEm'] == 'Israel')\nmother_side_all_grandparents_ashkenazi = (\n    Tbl_x2022[['EretzLeidaAvEm', 'EretzLeidaEmEm']].isin(['Europe', 'America']).all(axis=1)\n)\nmother_side_at_least_one_grandparent_israli_born = (\n    Tbl_x2022[['EretzLeidaAvEm', 'EretzLeidaEmEm']].isin(['Israel']).any(axis=1)\n)\n\nashkenazi_mother = (Tbl_x2022['EretzLeidaEm'].isin(['Europe', 'America']))\nisraeli_born_father = (Tbl_x2022['EretzLeidaAv'] == 'Israel')\nfather_side_all_grandparents_ashkenazi = (\n    Tbl_x2022[['EretzLeidaAvAV', 'EretzLeidaEmAV']].isin(['Europe', 'America']).all(axis=1)\n)\nfather_side_at_least_one_grandparent_israli_born = (\n    Tbl_x2022[['EretzLeidaAvAV', 'EretzLeidaEmAV']].isin(['Israel']).any(axis=1)\n)\n\nconditions_ashkenazi = (\n    second_and_a_half_generation &\n    (\n        (ashkenazi_father & israeli_born_mother &\n         (mother_side_all_grandparents_ashkenazi | mother_side_at_least_one_grandparent_israli_born)) |\n        (ashkenazi_mother & israeli_born_father &\n         (father_side_all_grandparents_ashkenazi | father_side_at_least_one_grandparent_israli_born))\n    )\n)\n\nTbl_x2022['secondhgash'] = np.where(conditions_ashkenazi, 1, np.nan)"
     },
     {
       "name": "secondghmix",
@@ -931,7 +1261,15 @@
       "source": "tbl_x2022",
       "notebook": "Tbl_x2022_compute_social_groups_var_fixed_CBS_safe.ipynb",
       "logic": "1 if generation==2.5 and the foreign-born parent is Mizrahi with Ashkenazi grandparent(s) on the other side, or vice versa. 0 otherwise.",
-      "inputs": ["generation", "EretzLeidaAv", "EretzLeidaEm", "EretzLeidaAvAV", "EretzLeidaAvEm", "EretzLeidaEmAV", "EretzLeidaEmEm"],
+      "inputs": [
+        "generation",
+        "EretzLeidaAv",
+        "EretzLeidaEm",
+        "EretzLeidaAvAV",
+        "EretzLeidaAvEm",
+        "EretzLeidaEmAV",
+        "EretzLeidaEmEm"
+      ],
       "code": "mother_side_at_least_one_grandparent_ashkenazi = (\n    Tbl_x2022[['EretzLeidaAvEm', 'EretzLeidaEmEm']].isin(['Europe', 'America']).any(axis=1)\n)\nfather_side_at_least_one_grandparent_ashkenazi = (\n    Tbl_x2022[['EretzLeidaAvAV', 'EretzLeidaEmAV']].isin(['Europe', 'America']).any(axis=1)\n)\nmother_side_at_least_one_grandparent_mizrahi = (\n    Tbl_x2022[['EretzLeidaAvEm', 'EretzLeidaEmEm']].isin(['Africa', 'Asia']).any(axis=1)\n)\nfather_side_at_least_one_grandparent_mizrahi = (\n    Tbl_x2022[['EretzLeidaAvAV', 'EretzLeidaEmAV']].isin(['Africa', 'Asia']).any(axis=1)\n)\n\n# Parent Mizrahi, other parent Israeli-born with Ashkenazi grandparent\ncond1 = (\n    second_and_a_half_generation &\n    (\n        (mizrahi_father_israeli_born_mother & mother_side_at_least_one_grandparent_ashkenazi) |\n        (mizrahi_mother_israeli_born_father & father_side_at_least_one_grandparent_ashkenazi)\n    )\n)\n\n# Parent Ashkenazi, other parent Israeli-born with Mizrahi grandparent\ncond2 = (\n    second_and_a_half_generation &\n    (\n        (ashkenazi_father_israeli_born_mother & mother_side_at_least_one_grandparent_mizrahi) |\n        (ashkenazi_mother_israeli_born_father & father_side_at_least_one_grandparent_mizrahi)\n    )\n)\n\nTbl_x2022['secondghmix'] = np.where(cond1 | cond2, 1, 0)"
     },
     {
@@ -941,7 +1279,13 @@
       "source": "tbl_x2022",
       "notebook": "Tbl_x2022_compute_social_groups_var_fixed_CBS_safe.ipynb",
       "logic": "1 if generation==3 and at least one grandparent from Africa/Asia and no grandparent from America/Europe. 0 otherwise.",
-      "inputs": ["generation", "EretzLeidaAvAV", "EretzLeidaAvEm", "EretzLeidaEmAV", "EretzLeidaEmEm"],
+      "inputs": [
+        "generation",
+        "EretzLeidaAvAV",
+        "EretzLeidaAvEm",
+        "EretzLeidaEmAV",
+        "EretzLeidaEmEm"
+      ],
       "code": "Tbl_x2022['thirdgmiz'] = np.where(\n    (Tbl_x2022['generation'] == 3) &\n    (\n        Tbl_x2022['EretzLeidaAvAV'].isin(['Africa', 'Asia']) |\n        Tbl_x2022['EretzLeidaAvEm'].isin(['Africa', 'Asia']) |\n        Tbl_x2022['EretzLeidaEmAV'].isin(['Africa', 'Asia']) |\n        Tbl_x2022['EretzLeidaEmEm'].isin(['Africa', 'Asia'])\n    ) &\n    ~(\n        Tbl_x2022['EretzLeidaAvAV'].isin(['America', 'Europe']) |\n        Tbl_x2022['EretzLeidaAvEm'].isin(['America', 'Europe']) |\n        Tbl_x2022['EretzLeidaEmAV'].isin(['America', 'Europe']) |\n        Tbl_x2022['EretzLeidaEmEm'].isin(['America', 'Europe'])\n    ),\n    1, 0\n)"
     },
     {
@@ -951,7 +1295,13 @@
       "source": "tbl_x2022",
       "notebook": "Tbl_x2022_compute_social_groups_var_fixed_CBS_safe.ipynb",
       "logic": "1 if generation==3 and at least one grandparent from America/Europe and no grandparent from Africa/Asia. 0 otherwise.",
-      "inputs": ["generation", "EretzLeidaAvAV", "EretzLeidaAvEm", "EretzLeidaEmAV", "EretzLeidaEmEm"],
+      "inputs": [
+        "generation",
+        "EretzLeidaAvAV",
+        "EretzLeidaAvEm",
+        "EretzLeidaEmAV",
+        "EretzLeidaEmEm"
+      ],
       "code": "Tbl_x2022['thirdgash'] = np.where(\n    (Tbl_x2022['generation'] == 3) &\n    (\n        Tbl_x2022['EretzLeidaAvAV'].isin(['America', 'Europe']) |\n        Tbl_x2022['EretzLeidaAvEm'].isin(['America', 'Europe']) |\n        Tbl_x2022['EretzLeidaEmAV'].isin(['America', 'Europe']) |\n        Tbl_x2022['EretzLeidaEmEm'].isin(['America', 'Europe'])\n    ) &\n    ~(\n        Tbl_x2022['EretzLeidaAvAV'].isin(['Africa', 'Asia']) |\n        Tbl_x2022['EretzLeidaAvEm'].isin(['Africa', 'Asia']) |\n        Tbl_x2022['EretzLeidaEmAV'].isin(['Africa', 'Asia']) |\n        Tbl_x2022['EretzLeidaEmEm'].isin(['Africa', 'Asia'])\n    ),\n    1, 0\n)"
     },
     {
@@ -961,7 +1311,11 @@
       "source": "tbl_x2022",
       "notebook": "Tbl_x2022_compute_social_groups_var_fixed_CBS_safe.ipynb",
       "logic": "Set to 1 for all 3rd generation, then set to 0 where thirdgmiz==1 or thirdgash==1 (i.e., the residual mixed group). NaN for non-3rd-gen.",
-      "inputs": ["generation", "thirdgmiz", "thirdgash"],
+      "inputs": [
+        "generation",
+        "thirdgmiz",
+        "thirdgash"
+      ],
       "code": "# Initialize thirdgmix to NaN\nTbl_x2022['thirdgmix'] = np.nan\n\n# Set thirdgmix to 1 for all third generation individuals\nTbl_x2022.loc[Tbl_x2022['generation'] == 3, 'thirdgmix'] = 1\n\n# Set thirdgmix to 0 for individuals identified as Mizrahi\nTbl_x2022.loc[Tbl_x2022['thirdgmiz'] == 1, 'thirdgmix'] = 0\n\n# Set thirdgmix to 0 for individuals identified as Ashkenazi\nTbl_x2022.loc[Tbl_x2022['thirdgash'] == 1, 'thirdgmix'] = 0"
     },
     {
@@ -971,7 +1325,21 @@
       "source": "tbl_x2022",
       "notebook": "Tbl_x2022_compute_social_groups_var_fixed_CBS_safe.ipynb",
       "logic": "Composite variable via np.select: 0=Arab, 1=1st gen Mizrahi, 2=1st gen Ashkenazi, 3=2nd gen Mizrahi, 4=2.5 gen Mizrahi, 5=2nd gen Ashkenazi, 6=2.5 gen Ashkenazi, 7=2nd gen mixed, 8=2.5 gen mixed, 9=3rd gen Mizrahi, 10=3rd gen Ashkenazi, 11=3rd gen mixed, 12=4th generation. Default NaN (~9% missing among Jews).",
-      "inputs": ["jew", "generation", "firstgmiz", "firstgash", "secondgmiz", "secondhgmiz", "secondgash", "secondhgash", "secondgmix", "secondghmix", "thirdgmiz", "thirdgash", "thirdgmix"],
+      "inputs": [
+        "jew",
+        "generation",
+        "firstgmiz",
+        "firstgash",
+        "secondgmiz",
+        "secondhgmiz",
+        "secondgash",
+        "secondhgash",
+        "secondgmix",
+        "secondghmix",
+        "thirdgmiz",
+        "thirdgash",
+        "thirdgmix"
+      ],
       "code": "Tbl_x2022['ety'] = np.nan\n\nconditions_ety = [\n    Tbl_x2022['jew'] == 0,\n    (Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 1) & (Tbl_x2022['firstgmiz'] == 1),\n    (Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 1) & (Tbl_x2022['firstgash'] == 1),\n    (Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 2) & (Tbl_x2022['secondgmiz'] == 1),\n    (Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 2.5) & (Tbl_x2022['secondhgmiz'] == 1),\n    (Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 2) & (Tbl_x2022['secondgash'] == 1),\n    (Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 2.5) & (Tbl_x2022['secondhgash'] == 1),\n    (Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 2) & (Tbl_x2022['secondgmix'] == 1),\n    (Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 2.5) & (Tbl_x2022['secondghmix'] == 1),\n    (Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 3) & (Tbl_x2022['thirdgmiz'] == 1),\n    (Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 3) & (Tbl_x2022['thirdgash'] == 1),\n    (Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 3) & (Tbl_x2022['thirdgmix'] == 1),\n    (Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 4)\n]\nvalues_ety = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]\n\nTbl_x2022['ety'] = np.select(conditions_ety, values_ety, default=np.nan)"
     },
     {
@@ -981,8 +1349,83 @@
       "source": "tbl_x2022",
       "notebook": "Tbl_x2022_compute_social_groups_var_fixed_CBS_safe.ipynb",
       "logic": "Like ety but merges 2nd and 2.5 generations: 0=Arab, 1=1st gen Mizrahi, 2=1st gen Ashkenazi, 3=2nd/2.5 gen Mizrahi, 4=2nd/2.5 gen Ashkenazi, 5=2nd/2.5 gen mixed, 6=3rd gen Mizrahi, 7=3rd gen Ashkenazi, 8=3rd gen mixed, 9=4th generation. Default NaN.",
-      "inputs": ["jew", "generation", "firstgmiz", "firstgash", "secondgmiz", "secondhgmiz", "secondgash", "secondhgash", "secondgmix", "secondghmix", "thirdgmiz", "thirdgash", "thirdgmix"],
+      "inputs": [
+        "jew",
+        "generation",
+        "firstgmiz",
+        "firstgash",
+        "secondgmiz",
+        "secondhgmiz",
+        "secondgash",
+        "secondhgash",
+        "secondgmix",
+        "secondghmix",
+        "thirdgmiz",
+        "thirdgash",
+        "thirdgmix"
+      ],
       "code": "Tbl_x2022['et'] = np.nan\n\nconditions_et = [\n    Tbl_x2022['jew'] == 0,\n    (Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 1) & (Tbl_x2022['firstgmiz'] == 1),\n    (Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 1) & (Tbl_x2022['firstgash'] == 1),\n    ((Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 2) & (Tbl_x2022['secondgmiz'] == 1)) |\n    ((Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 2.5) & (Tbl_x2022['secondhgmiz'] == 1)),\n    ((Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 2) & (Tbl_x2022['secondgash'] == 1)) |\n    ((Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 2.5) & (Tbl_x2022['secondhgash'] == 1)),\n    ((Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 2) & (Tbl_x2022['secondgmix'] == 1)) |\n    ((Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 2.5) & (Tbl_x2022['secondghmix'] == 1)),\n    (Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 3) & (Tbl_x2022['thirdgmiz'] == 1),\n    (Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 3) & (Tbl_x2022['thirdgash'] == 1),\n    (Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 3) & (Tbl_x2022['thirdgmix'] == 1),\n    (Tbl_x2022['jew'] == 1) & (Tbl_x2022['generation'] == 4)\n]\nvalues_et = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]\n\nTbl_x2022['et'] = np.select(conditions_et, values_et, default=np.nan)"
+    },
+    {
+      "name": "ba",
+      "definition": "Higher education indicator (1 = has a BA degree or more, 0 = does not have a BA degree)",
+      "type": "education",
+      "source": "tbl_mh2021",
+      "notebook": "tbl_mh2021_compute_social_groups_var_cbs_safe.ipynb",
+      "logic": "Set to 1 if Q4_SemelTeudaGvohaBeyoter (highest degree code) is <= 3, indicating a BA degree or higher. Also set to 1 if the degree code is missing but Q2_ShnotLimudKolHaMekorot (total years of education from all sources) is >= 16. Default 0.",
+      "inputs": [
+        "Q4_SemelTeudaGvohaBeyoter",
+        "Q2_ShnotLimudKolHaMekorot"
+      ],
+      "code": "tbl_mh2021['ba'] = np.select(\n    [\n        tbl_mh2021['Q4_SemelTeudaGvohaBeyoter'] <= 3,\n        tbl_mh2021['Q4_SemelTeudaGvohaBeyoter'].isna()\n        & (tbl_mh2021['Q2_ShnotLimudKolHaMekorot'] >= 16)\n    ],\n    [1, 1],\n    default=0\n)"
+    },
+    {
+      "name": "SemelYishuvnew2020",
+      "definition": "CBS locality code (2020 classification)",
+      "type": "geography",
+      "source": "tbl_yishuvomoeza95_2022",
+      "notebook": "geographic_division_cbs_safe.ipynb",
+      "logic": "CBS source variable from tbl_yishuvomoeza95_2022. Identifies the locality (yishuv) of each individual using the 2020 CBS locality coding scheme. Used as a merge key to bring in locality-level attributes such as the socio-economic cluster.",
+      "inputs": [],
+      "code": "# CBS source variable — used directly from tbl_yishuvomoeza95_2022",
+      "tag": "CBS source"
+    },
+    {
+      "name": "Moeza2020",
+      "definition": "CBS regional council code (2020 classification)",
+      "type": "geography",
+      "source": "tbl_yishuvomoeza95_2022",
+      "notebook": "geographic_division_cbs_safe.ipynb",
+      "logic": "CBS source variable from tbl_yishuvomoeza95_2022. Identifies the regional council (moeza) of each individual using the 2020 CBS regional council coding scheme. Used as a merge key and as a fallback for the socio-economic cluster when the locality-level cluster is missing.",
+      "inputs": [],
+      "code": "# CBS source variable — used directly from tbl_yishuvomoeza95_2022",
+      "tag": "CBS source"
+    },
+    {
+      "name": "cluster_yishuv_moeza",
+      "definition": "Socio-economic cluster of the individual's locality, with regional council fallback",
+      "type": "geography",
+      "source": "tbl_yishuvomoeza95_2022",
+      "notebook": "geographic_division_cbs_safe.ipynb",
+      "logic": "Socio-economic cluster assigned to each individual. Uses the locality-level cluster (from yishuv_2020 lookup on SemelYishuvnew2020) when available. When the locality cluster is missing, falls back to the regional council-level cluster (from moeza_2020 lookup on Moeza2020, aggregated by mode). The moeza_2020 lookup is aggregated by Moeza2020 using the mode of cluster_moeza to handle duplicates.",
+      "inputs": [
+        "SemelYishuvnew2020",
+        "Moeza2020"
+      ],
+      "code": "df_merge = pd.merge(tbl_yishuvomoeza95_2022,\n    yishuv_2020[['yishuv_name', 'SemelYishuvnew2020', 'cluster']],\n    on='SemelYishuvnew2020', how='left')\n\nmoeza_agg = moeza_2020[['regional_council_name', 'Moeza2020', 'cluster_moeza']]\\\n    .groupby('Moeza2020').agg({\n        'regional_council_name': 'first',\n        'cluster_moeza': pd.Series.mode\n    }).reset_index()\n\ndf_merge = pd.merge(df_merge, moeza_agg, on='Moeza2020', how='left')\n\ndf_merge['cluster_yishuv_moeza'] = np.where(\n    df_merge['cluster'].notna(),\n    df_merge['cluster'],\n    df_merge['cluster_moeza']\n)"
+    },
+    {
+      "name": "age",
+      "definition": "Age of the individual in a given year",
+      "type": "demographics",
+      "source": "tbl_hahnsotpratt87_21, tbl_x2022",
+      "notebook": "merging_stages_2_and_cbs_safe.ipynb",
+      "logic": "Current year (shana) minus birth year (ShanaLeida). Negative values are set to NaN.",
+      "inputs": [
+        "shana",
+        "ShanaLeida"
+      ],
+      "code": "merged_df['age'] = merged_df['shana'] - merged_df['ShanaLeida']\nmerged_df['age'] = merged_df['age'].where(merged_df['age'] >= 0, np.nan)"
     }
   ]
 }
