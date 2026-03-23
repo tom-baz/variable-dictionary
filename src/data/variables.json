@@ -198,7 +198,7 @@
       "inputs": [
         "wages_s2"
       ],
-      "code": "social_contribution = df_attributed_income.loc[1, year_int] * 1000000\nfiltered_df = df[df[\"wages_s2\"] > 0].copy()\ntotal_wage = filtered_df[\"wages_s2\"].sum()\nfiltered_df[\"benefits_allocated_s3\"] = (\n    (filtered_df[\"wages_s2\"] / total_wage) * social_contribution\n)\ndf = df.merge(filtered_df[[\"benefits_allocated_s3\"]],\n              left_index=True, right_index=True, how=\"left\")\ndf[\"benefits_allocated_s3\"] = df[\"benefits_allocated_s3\"].fillna(0)"
+      "code": "social_contribution_row_52 = df_attributed_income.loc[1, year_int] * 1000000\nfiltered_wage_df = df[df[\"wages_s2\"] > 0].copy()\ntotal_wage = filtered_wage_df[\"wages_s2\"].sum()\nfiltered_wage_df[\"benefits_allocated_s3\"] = (\n    (filtered_wage_df[\"wages_s2\"] / total_wage) * social_contribution_row_52\n)\ndf = df.merge(filtered_wage_df[[\"benefits_allocated_s3\"]],\n              left_index=True, right_index=True, how=\"left\")\ndf[\"benefits_allocated_s3\"] = df[\"benefits_allocated_s3\"].fillna(0)"
     },
     {
       "name": "benefits_allocated_r1_s3",
@@ -210,7 +210,7 @@
       "inputs": [
         "wages_s2"
       ],
-      "code": "social_contribution = df_attributed_income.loc[2, year_int] * 1000000\nfiltered_df = df[df[\"wages_s2\"] > 0].copy()\ntotal_wage = filtered_df[\"wages_s2\"].sum()\nfiltered_df[\"benefits_allocated_r1_s3\"] = (\n    (filtered_df[\"wages_s2\"] / total_wage) * social_contribution\n)\ndf = df.merge(filtered_df[[\"benefits_allocated_r1_s3\"]],\n              left_index=True, right_index=True, how=\"left\")\ndf[\"benefits_allocated_r1_s3\"] = df[\"benefits_allocated_r1_s3\"].fillna(0)"
+      "code": "social_contribution_row_45 = df_attributed_income.loc[2, year_int] * 1000000\nfiltered_wage_df = df[df[\"wages_s2\"] > 0].copy()\ntotal_wage = filtered_wage_df[\"wages_s2\"].sum()\nfiltered_wage_df[\"benefits_allocated_r1_s3\"] = (\n    (filtered_wage_df[\"wages_s2\"] / total_wage) * social_contribution_row_45\n)\ndf = df.merge(filtered_wage_df[[\"benefits_allocated_r1_s3\"]],\n              left_index=True, right_index=True, how=\"left\")\ndf[\"benefits_allocated_r1_s3\"] = df[\"benefits_allocated_r1_s3\"].fillna(0)"
     },
     {
       "name": "labor_income_s3",
@@ -261,7 +261,7 @@
       "inputs": [
         "property_reported_income_s3"
       ],
-      "code": "rent_amount = df_attributed_income.loc[3, year_int] * 1000000\nfiltered_df = df[df[\"property_reported_income_s3\"] > 0].copy()\ntotal = filtered_df[\"property_reported_income_s3\"].sum()\nfiltered_df[\"property_attributed_rent_s3\"] = (\n    (filtered_df[\"property_reported_income_s3\"] / total) * rent_amount\n)\ndf = df.merge(filtered_df[[\"property_attributed_rent_s3\"]],\n              left_index=True, right_index=True, how=\"left\")\ndf[\"property_attributed_rent_s3\"] = df[\"property_attributed_rent_s3\"].fillna(0)"
+      "code": "social_contribution_row_8 = df_attributed_income.loc[3, year_int] * 1000000\nfiltered_df = df[df[\"property_reported_income_s3\"] > 0].copy()\ntotal_property_reported_income_s3 = filtered_df[\"property_reported_income_s3\"].sum()\nfiltered_df[\"property_attributed_rent_s3\"] = (\n    (filtered_df[\"property_reported_income_s3\"] / total_property_reported_income_s3) * social_contribution_row_8\n)\ndf = df.merge(filtered_df[[\"property_attributed_rent_s3\"]],\n              left_index=True, right_index=True, how=\"left\")\ndf[\"property_attributed_rent_s3\"] = df[\"property_attributed_rent_s3\"].fillna(0)"
     },
     {
       "name": "property_attributed_income_s3",
@@ -275,7 +275,7 @@
         "tax_report",
         "property_reported_income_s3"
       ],
-      "code": "def create_property_attributed_income(df, total_amount):\n    result_df = df.copy()\n    result_df[\"property_attributed_income_s3\"] = 0\n    mask_target = (result_df[\"tax_report\"] == 0) & (result_df[\"wages_s2\"] > 0)\n    mask_ref = (\n        (result_df[\"tax_report\"] == 1)\n        & (result_df[\"wages_s2\"] > 0)\n        & (result_df[\"property_reported_income_s3\"] > 0)\n    )\n    ref_wages = result_df.loc[mask_ref, \"wages_s2\"].values\n    ref_property = result_df.loc[mask_ref, \"property_reported_income_s3\"].values\n    target_wages = result_df.loc[mask_target, \"wages_s2\"].values\n    idx = np.argsort(ref_wages)\n    sorted_wages = ref_wages[idx]\n    sorted_property = ref_property[idx]\n    ref_pct = np.linspace(0, 1, len(sorted_wages))\n    target_pct = stats.rankdata(target_wages, method=\"average\") / len(target_wages)\n    f_interp = interp1d(\n        ref_pct, sorted_property, kind=\"linear\",\n        bounds_error=False,\n        fill_value=(sorted_property[0], sorted_property[-1])\n    )\n    raw = np.maximum(f_interp(target_pct), 0)\n    scale = total_amount / raw.sum() if raw.sum() > 0 else 0\n    result_df.loc[mask_target, \"property_attributed_income_s3\"] = raw * scale\n    return result_df\n\namount = df_attributed_income.loc[4, year_int] * 1000000\ndf = create_property_attributed_income(df, amount)\ndf[\"property_attributed_income_s3\"] = df[\"property_attributed_income_s3\"].fillna(0)"
+      "code": "def create_propery_attributed_income(df, taxable_property_not_annual_tax_report):\n    result_df = df.copy()\n    result_df[\"property_attributed_income_s3\"] = 0\n    mask_wage_no_report = (result_df[\"tax_report\"] == 0) & (result_df[\"wages_s2\"] > 0)\n    mask_wage_with_report = (\n        (result_df[\"tax_report\"] == 1)\n        & (result_df[\"wages_s2\"] > 0)\n        & (result_df[\"property_reported_income_s3\"] > 0)\n    )\n    if sum(mask_wage_with_report) == 0:\n        return result_df\n    reference_wages = result_df.loc[mask_wage_with_report, \"wages_s2\"].values\n    reference_property = result_df.loc[mask_wage_with_report, \"property_reported_income_s3\"].values\n    target_wages = result_df.loc[mask_wage_no_report, \"wages_s2\"].values\n    reference_indices = np.argsort(reference_wages)\n    sorted_reference_wages = reference_wages[reference_indices]\n    sorted_reference_property = reference_property[reference_indices]\n    reference_wage_percentiles = np.linspace(0, 1, len(sorted_reference_wages))\n    target_wage_percentiles = stats.rankdata(target_wages, method=\"average\") / len(target_wages)\n    f_interp = interp1d(\n        reference_wage_percentiles, sorted_reference_property, kind=\"linear\",\n        bounds_error=False,\n        fill_value=(sorted_reference_property[0], sorted_reference_property[-1])\n    )\n    raw_predictions = np.maximum(f_interp(target_wage_percentiles), 0)\n    scaling_dactor = taxable_property_not_annual_tax_report / raw_predictions.sum() if raw_predictions.sum() > 0 else 0\n    adjusted_predictions = raw_predictions * scaling_dactor\n    result_df.loc[mask_wage_no_report, \"property_attributed_income_s3\"] = adjusted_predictions\n    return result_df\n\ntaxable_property_not_annual_tax_report = df_attributed_income.loc[4, year_int] * 1000000\ndf = create_propery_attributed_income(df, taxable_property_not_annual_tax_report)\ndf[\"property_attributed_income_s3\"] = df[\"property_attributed_income_s3\"].fillna(0)"
     },
     {
       "name": "property_income_s3",
@@ -314,7 +314,7 @@
       "inputs": [
         "property_reported_income_s3"
       ],
-      "code": "profits_amount = df_attributed_income.loc[5, year_int] * 1000000\nfiltered_df = df[df[\"property_reported_income_s3\"] > 0].copy()\ntotal = filtered_df[\"property_reported_income_s3\"].sum()\nfiltered_df[\"profits_attributed_income_s3\"] = (\n    (filtered_df[\"property_reported_income_s3\"] / total) * profits_amount\n)\ndf = df.merge(filtered_df[[\"profits_attributed_income_s3\"]],\n              left_index=True, right_index=True, how=\"left\")\ndf[\"profits_attributed_income_s3\"] = df[\"profits_attributed_income_s3\"].fillna(0)"
+      "code": "Undistributed_profits_row_28 = df_attributed_income.loc[5, year_int] * 1000000\nfiltered_df = df[df[\"property_reported_income_s3\"] > 0].copy()\ntotal_property_reported_income_s3 = filtered_df[\"property_reported_income_s3\"].sum()\nfiltered_df[\"profits_attributed_income_s3\"] = (\n    (filtered_df[\"property_reported_income_s3\"] / total_property_reported_income_s3) * Undistributed_profits_row_28\n)\ndf = df.merge(filtered_df[[\"profits_attributed_income_s3\"]],\n              left_index=True, right_index=True, how=\"left\")\ndf[\"profits_attributed_income_s3\"] = df[\"profits_attributed_income_s3\"].fillna(0)"
     },
     {
       "name": "capital_income_s3",
