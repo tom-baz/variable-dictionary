@@ -844,6 +844,7 @@
       "type": "premium",
       "source": "computed",
       "notebook": "simple_analysis.txt",
+      "language": "stata",
       "logic": "Population: ages 20–67 with positive labor income, at firms with ≥5 workers. Compute ln(labor_income_s4), define age categories (20–35, 36–50, 51–67), then run reghdfe ln_labor, absorb(labor_fe = firm_id, i.age_cat, i.male, i.jew, i.ba). The saved firm fixed effect is the labor premium, deduplicated at the firm level.",
       "inputs": [
         "labor_income_s4",
@@ -861,6 +862,7 @@
       "type": "premium",
       "source": "computed",
       "notebook": "simple_analysis.txt",
+      "language": "stata",
       "logic": "Population: ages 20–67 with positive capital income, at firms with ≥5 workers. Compute ln(capital_income_5_s4), define age categories (20–35, 36–50, 51–67), then run reghdfe ln_capital, absorb(capital_fe = firm_id, i.age_cat, i.male, i.jew, i.ba). The saved firm fixed effect is the capital premium, deduplicated at the firm level.",
       "inputs": [
         "capital_income_5_s4",

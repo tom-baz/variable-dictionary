@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import Prism from "prismjs";
 import "prismjs/components/prism-python";
+import "prismjs/components/prism-stata";
 import "prismjs/themes/prism-tomorrow.css";
 import VARIABLES from "./data/variables.json";
 import labLogo from "./lab-logo.png";
@@ -70,7 +71,7 @@ function InputPill({ name, isClickable, onClick }) {
   );
 }
 
-function CodeBlock({ code }) {
+function CodeBlock({ code, language = "python" }) {
   const [copied, setCopied] = useState(false);
   const codeRef = useRef(null);
   const handleCopy = () => {
@@ -97,7 +98,7 @@ function CodeBlock({ code }) {
         fontFamily: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace",
         overflowX: "auto", margin: 0, border: "1px solid #313244",
       }}>
-        <code ref={codeRef} className="language-python">{code}</code>
+        <code ref={codeRef} className={`language-${language}`}>{code}</code>
       </pre>
     </div>
   );
@@ -213,8 +214,8 @@ function VariableDetail({ variable, allVarNames, onSelectVar }) {
 
       {variable.code && variable.code.trim() !== "" && (
         <div>
-          <label style={labelStyle}>Python Code</label>
-          <CodeBlock code={variable.code} />
+          <label style={labelStyle}>{variable.language === "stata" ? "Stata Code" : "Python Code"}</label>
+          <CodeBlock code={variable.code} language={variable.language || "python"} />
         </div>
       )}
     </div>
