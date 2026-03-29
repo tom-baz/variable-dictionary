@@ -1,7 +1,10 @@
-# Variable Dictionary
+# DIWA Variable Dictionary
 
-Interactive browser for research variable definitions, source tables, construction logic, and Python code.
-Built for the CBS Income & Wages research project.
+Interactive browser for research variable definitions used across DIWA research strategies. For each variable, the app displays its definition, source tables, construction logic, input dependencies, and code (Python or Stata).
+
+Built for the DIWA research project at the University of Haifa, using CBS (Central Bureau of Statistics) administrative data.
+
+**Live app:** https://tom-baz.github.io/variable-dictionary/
 
 ## Quick Start (run locally)
 
@@ -93,8 +96,7 @@ Open it in any text editor. The structure is:
       "inputs": ["HahnasaSahar"],
       "code": "df['wages_s2'] = df['HahnasaSahar'].fillna(0)"
     }
-  ],
-  "Strategy 4": [ ... ]
+  ]
 }
 ```
 
@@ -106,23 +108,26 @@ Copy an existing entry and fill in the fields:
 |-------------|----------|-------------|
 | name        | Yes | Variable name (e.g., "wages_s2") |
 | definition  | Yes | Human-readable description |
-| type        | Yes | One of: "wage", "capital", "benefits", "demographics", "wage, capital" |
+| type        | Yes | One of: "wage", "capital", "benefits", "demographics", "wage, capital", "class", "generation", "ethnicity", "education", "geography", "premium" |
 | source      | Yes | Source table(s), comma-separated |
-| notebook    | No  | Which .ipynb file has the code (use null if none) |
+| notebook    | No  | Which notebook file has the code (use null if none) |
 | logic       | Yes | Plain-English explanation of construction |
 | inputs      | Yes | Array of input variable names (use [] if none) |
-| code        | Yes | Python code snippet (use \n for newlines) |
+| code        | Yes | Code snippet (use \n for newlines) |
+| language    | No  | Code language: omit for Python (default), or "stata" for Stata code |
 | tag         | No  | Optional badge (e.g., "CBS source") |
 
-### To add a new strategy
+### To add a new strategy or category
 
-Add a new key at the top level of the JSON — it automatically appears as a tab:
+Add a new key at the top level of the JSON — it automatically appears as a tab in the app:
 
 ```json
 {
   "Strategy 2": [...],
+  "Strategy 3": [...],
   "Strategy 4": [...],
-  "Strategy 5": [...]
+  "Production Classes": [...],
+  "Social Groups": [...]
 }
 ```
 
@@ -133,7 +138,7 @@ variable-dictionary/
 ├── src/
 │   ├── data/
 │   │   └── variables.json   ← Edit this to add/change variables
-│   ├── App.jsx              ← The app code
+│   ├── App.jsx              ← The app code (single-file architecture)
 │   └── main.jsx             ← Entry point
 ├── index.html
 ├── package.json
