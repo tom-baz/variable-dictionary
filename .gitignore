@@ -4,3 +4,6 @@ dist
 CLAUDE.md
 CBS code files/
 textual information/
+
+# Stray Windows reserved-name artifact (cannot be deleted via normal tooling)
+nul
