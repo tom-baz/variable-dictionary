@@ -722,6 +722,17 @@
       "code": "df['labor_income_s4'] = df[[\n    'wages_s2',\n    'benefits_2_s4'\n]].sum(axis=1, min_count=1)\ndf['labor_income_s4'] = df['labor_income_s4'].fillna(0)"
     },
     {
+      "name": "profits_mirsham",
+      "definition": "Firm-level undistributed profit (profit not paid out as dividends), before corporate tax",
+      "type": "capital",
+      "source": "D:\\Talik\\firm_data_all_profits (merged in via worker_firm_plus_{year}.pkl)",
+      "notebook": null,
+      "logic": "Built outside this project; construction code not available. Definition (undistributed, pre-tax profit) confirmed by Tali, Oct 2026. Merged to workers by koteret_mis_tik_fic, or by pseudo_firm2 where the firm ID is missing, and year; when several records match, the highest profits_mirsham is kept. Arrives in worker_firm_plus_{year}.pkl; missing values set to 0 before use. Allocated to individuals in profits_5_s4 and profits_6_s4.",
+      "inputs": [],
+      "code": "# External input — construction code is on the CBS server and was not exported\ndf_workplace = pd.read_pickle(f\"D:\\\\Tom\\\\strategy_4\\\\worker_firm_plus_{year}.pkl\")\ndf = df.merge(df_workplace, on=['MisparTeudatZehut_fic', 'shana'], how='left')\ndf['profits_mirsham'] = df['profits_mirsham'].fillna(0)",
+      "tag": "external input"
+    },
+    {
       "name": "profits_5_s4",
       "definition": "Distributed firm profits (top-10% earners in large firms, equal in small firms)",
       "type": "capital",
